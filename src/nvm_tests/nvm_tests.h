@@ -134,10 +134,12 @@ void testNVMFloat();
  */
 void testNVMDouble();
 
+#ifndef NO_CHAR_ARRAY_SUPPORT
 /**
  * Tests if writing and getting char array works
  */
 void testNVMCharArray();
+#endif
 
 /**
  * Tests all nvm tests at once
