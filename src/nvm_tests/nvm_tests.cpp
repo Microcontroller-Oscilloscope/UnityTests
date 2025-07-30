@@ -64,9 +64,11 @@ template <typename T> void getValue(uint16_t address, T *value) {
  * 
  * @param key key of value to test
  * @param value value to compare operations to
+ * @param defaultValue default value from get
+ * @param canDefault if get can return default value
  */
 template <typename T>
-void testInt(uint16_t key, T value) {
+void testInt(uint16_t key, T value, T defaultValue, bool canDefault) {
 
 	T result;
 
@@ -75,6 +77,9 @@ void testInt(uint16_t key, T value) {
 	if (value != result) {
 		TEST_FAIL_MESSAGE("Mismatched Values");
 	}
+	if (!canDefault && value == defaultValue) {
+		TEST_FAIL_MESSAGE("Value can't default");
+	}
 }
 
 /**
@@ -82,15 +87,17 @@ void testInt(uint16_t key, T value) {
  * 
  * @param key key of value to test
  * @param max maximum value of the int
+ * @param defaultValue default value from get
  */
 template <typename T>
-void testIntType(uint16_t key, T max) {
+void testIntType(uint16_t key, T max, T defaultValue) {
 
 	nvmNotStarted();
 	T zero = 0;
 
-	testInt(key, max);
-	testInt(key, zero);
+	testInt(key, max, defaultValue, CAN_DEFAULT);
+	testInt(key, max, defaultValue, CAN_NOT_DEFAULT);
+	testInt(key, zero, defaultValue, CAN_DEFAULT);
 }
 
 /**
@@ -99,12 +106,14 @@ void testIntType(uint16_t key, T max) {
  * @param key key of value to test
  * @param min minimum value of the int
  * @param max maximum value of the int
+ * @param defaultValue default value from get
  */
 template <typename T>
-void testIntType(uint16_t key, T min, T max) {
+void testIntType(uint16_t key, T min, T max, T defaultValue) {
 
-	testIntType(key, max);
-	testInt(key, min);
+	testIntType(key, max, defaultValue);
+	testInt(key, min, defaultValue, CAN_DEFAULT);
+	testInt(key, min, defaultValue, CAN_NOT_DEFAULT);
 }
 
 void setupNVMTests(uint16_t nvmSizeNew) {
@@ -165,47 +174,47 @@ void testNVMInit() {
 }
 
 void testNVMBool() {
-	testIntType(BOOL_KEY, true);
+	testIntType(BOOL_KEY, true, DEFAULT_BOOL);
 }
 
 void testNVMi8() {
-	testIntType(I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX);
+	testIntType(I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX, (int8_t)DEFAULT_INT);
 }
 
 void testNVMu8() {
-	testIntType(U8_KEY, (uint8_t)UINT8_MAX);
+	testIntType(U8_KEY, (uint8_t)UINT8_MAX, (uint8_t)DEFAULT_INT);
 }
 
 void testNVMi16() {
-	testIntType(I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX);
+	testIntType(I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX, (int16_t)DEFAULT_INT);
 }
 
 void testNVMu16() {
-	testIntType(U16_KEY, (uint16_t)UINT16_MAX);
+	testIntType(U16_KEY, (uint16_t)UINT16_MAX, (uint16_t)DEFAULT_INT);
 }
 
 void testNVMi32() {
-	testIntType(I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX);
+	testIntType(I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX, (int32_t)DEFAULT_INT);
 }
 
 void testNVMu32() {
-	testIntType(U32_KEY, (uint32_t)UINT32_MAX);
+	testIntType(U32_KEY, (uint32_t)UINT32_MAX, (uint32_t)DEFAULT_INT);
 }
 
 void testNVMi64() {
-	testIntType(I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX);
+	testIntType(I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX, (int64_t)DEFAULT_INT);
 }
 
 void testNVMu64() {
-	testIntType(U64_KEY, (uint64_t)UINT64_MAX);
+	testIntType(U64_KEY, (uint64_t)UINT64_MAX, (uint64_t)DEFAULT_INT);
 }
 
 void testNVMFloat() {
-	testIntType(FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__);
+	testIntType(FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, DEFAULT_FLOAT);
 }
 
 void testNVMDouble() {
-	testIntType(DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__);
+	testIntType(DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT);
 }
 
 void testNVMCharArray() {
