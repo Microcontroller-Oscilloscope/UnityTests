@@ -54,17 +54,18 @@
 #include "nvm/core_pref.h"
 #endif
 
-#define BOOL_KEY	0
-#define I8_KEY		(BOOL_KEY + BYTE1_SIZE)
-#define U8_KEY		(I8_KEY + BYTE1_SIZE)
-#define I16_KEY		(U8_KEY + BYTE1_SIZE)
-#define U16_KEY		(I16_KEY + BYTE2_SIZE)
-#define I32_KEY		(U16_KEY + BYTE2_SIZE)
-#define U32_KEY		(I32_KEY + BYTE4_SIZE)
-#define I64_KEY		(U32_KEY + BYTE4_SIZE)
-#define U64_KEY		(I64_KEY + BYTE8_SIZE)
-#define FLOAT_KEY	(U64_KEY + BYTE8_SIZE)
-#define DOUBLE_KEY	(FLOAT_KEY + BYTE8_SIZE)
+#define BOOL_KEY		0
+#define I8_KEY			(BOOL_KEY + BYTE1_SIZE)
+#define U8_KEY			(I8_KEY + BYTE1_SIZE)
+#define I16_KEY			(U8_KEY + BYTE1_SIZE)
+#define U16_KEY			(I16_KEY + BYTE2_SIZE)
+#define I32_KEY			(U16_KEY + BYTE2_SIZE)
+#define U32_KEY			(I32_KEY + BYTE4_SIZE)
+#define I64_KEY			(U32_KEY + BYTE4_SIZE)
+#define U64_KEY			(I64_KEY + BYTE8_SIZE)
+#define FLOAT_KEY		(U64_KEY + BYTE8_SIZE)
+#define DOUBLE_KEY		(FLOAT_KEY + BYTE8_SIZE)
+#define CHAR_ARRAY_KEY	(DOUBLE_KEY + BYTE8_SIZE)
 
 /**
  * Sets up NVM testing suite
@@ -132,6 +133,11 @@ void testNVMFloat();
  * Tests if writing and getting double works
  */
 void testNVMDouble();
+
+/**
+ * Tests if writing and getting char array works
+ */
+void testNVMCharArray();
 
 /**
  * Tests all nvm tests at once

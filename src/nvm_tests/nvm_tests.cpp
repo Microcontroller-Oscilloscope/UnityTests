@@ -169,53 +169,115 @@ void testNVMBool() {
 }
 
 void testNVMi8() {
-	typedef int8_t nvmInt;
-	testIntType(I8_KEY, (nvmInt)INT8_MIN, (nvmInt)INT8_MAX);
+	testIntType(I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX);
 }
 
 void testNVMu8() {
-	typedef uint8_t nvmInt;
-	testIntType(U8_KEY, (nvmInt)UINT8_MAX);
+	testIntType(U8_KEY, (uint8_t)UINT8_MAX);
 }
 
 void testNVMi16() {
-	typedef int16_t nvmInt;
-	testIntType(I16_KEY, (nvmInt)INT16_MIN, (nvmInt)INT16_MAX);
+	testIntType(I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX);
 }
 
 void testNVMu16() {
-	typedef uint16_t nvmInt;
-	testIntType(U16_KEY, (nvmInt)UINT16_MAX);
+	testIntType(U16_KEY, (uint16_t)UINT16_MAX);
 }
 
 void testNVMi32() {
-	typedef int32_t nvmInt;
-	testIntType(I32_KEY, (nvmInt)INT32_MIN, (nvmInt)INT32_MAX);
+	testIntType(I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX);
 }
 
 void testNVMu32() {
-	typedef uint32_t nvmInt;
-	testIntType(U32_KEY, (nvmInt)UINT32_MAX);
+	testIntType(U32_KEY, (uint32_t)UINT32_MAX);
 }
 
 void testNVMi64() {
-	typedef int64_t nvmInt;
-	testIntType(I64_KEY, (nvmInt)INT64_MIN, (nvmInt)INT64_MAX);
+	testIntType(I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX);
 }
 
 void testNVMu64() {
-	typedef uint64_t nvmInt;
-	testIntType(U64_KEY, (nvmInt)UINT64_MAX);
+	testIntType(U64_KEY, (uint64_t)UINT64_MAX);
 }
 
 void testNVMFloat() {
-	typedef float nvmInt;
-	testIntType(FLOAT_KEY, (nvmInt)__FLT_MIN__, (nvmInt)__FLT_MAX__);
+	testIntType(FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__);
 }
 
 void testNVMDouble() {
-	typedef double nvmInt;
-	testIntType(DOUBLE_KEY, (nvmInt)__DBL_MIN__, (nvmInt)__DBL_MAX__);
+	testIntType(DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__);
+}
+
+void testNVMCharArray() {
+
+	nvmNotStarted();
+
+	char *testVal = (char*)"test";
+	uint8_t charSize = charArraySize(testVal);
+
+	char *nullPtr;
+	char smallOutput[1];
+	char output[charSize];
+	char *emptyVal = (char*)"";
+	bool valid;
+
+	valid = nvmWriteValue(CHAR_ARRAY_KEY, nullPtr, 1);
+	if (valid) {
+		TEST_FAIL_MESSAGE("Write shouldn't accept null input");
+	}
+
+	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, 0);
+	if (valid) {
+		TEST_FAIL_MESSAGE("Write shouldn't accept max length of 0");
+	}
+
+	valid = nvmWriteValue(CHAR_ARRAY_KEY, emptyVal, 1);
+	if (!valid) {
+		TEST_FAIL_MESSAGE("Write should accept empty char array");
+	}
+
+	valid = nvmGetValue(CHAR_ARRAY_KEY, smallOutput, 1);
+	if (!valid) {
+		TEST_FAIL_MESSAGE("Get should accept empty char array");
+	}
+
+	if (!sameString(smallOutput, emptyVal)) {
+		TEST_FAIL_MESSAGE("Failed to get empty string");
+	}
+
+	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, 2);
+	if (valid) {
+		TEST_FAIL_MESSAGE("Write should catch max length not long enough");
+	}
+
+	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, charSize);
+	if (!valid) {
+		TEST_FAIL_MESSAGE("Write should be successful");
+	}
+
+	valid = nvmGetValue(CHAR_ARRAY_KEY, nullPtr, 0);
+	if (valid) {
+		TEST_FAIL_MESSAGE("Get shouldn't accept null input");
+	}
+
+	valid = nvmGetValue(CHAR_ARRAY_KEY, smallOutput, 0);
+	if (valid) {
+		TEST_FAIL_MESSAGE("Get shouldn't accept max length of 0");
+	}
+
+	valid = nvmGetValue(CHAR_ARRAY_KEY, output, 2);
+	if (valid) {
+		TEST_FAIL_MESSAGE("Get should catch max length not long enough");
+	}
+
+	valid = nvmGetValue(CHAR_ARRAY_KEY, output, charSize);
+	if (!valid) {
+		TEST_FAIL_MESSAGE("Get should be successful");
+	}
+
+	if (!sameString(output, testVal)) {
+		TEST_FAIL_MESSAGE("Failed to get test string");
+	}
 }
 
 void testNVM() {
@@ -231,6 +293,7 @@ void testNVM() {
 	RUN_TEST(&testNVMu64);
 	RUN_TEST(&testNVMFloat);
 	RUN_TEST(&testNVMDouble);
+	RUN_TEST(&testNVMCharArray);
 }
 
 #endif
