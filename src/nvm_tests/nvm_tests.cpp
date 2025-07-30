@@ -210,7 +210,7 @@ void testNVMu64() {
 }
 
 void testNVMFloat() {
-	testIntType(FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, DEFAULT_FLOAT);
+	testIntType(FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT);
 }
 
 void testNVMDouble() {
