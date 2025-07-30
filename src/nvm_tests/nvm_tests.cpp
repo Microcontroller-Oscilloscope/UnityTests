@@ -224,7 +224,7 @@ void testNVMCharArray() {
 	char *testVal = (char*)"test";
 	uint8_t charSize = charArraySize(testVal);
 
-	char *nullPtr;
+	char *nullPtr = nullptr;
 	char smallOutput[1];
 	char output[charSize];
 	char *emptyVal = (char*)"";
