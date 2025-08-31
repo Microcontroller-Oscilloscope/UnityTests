@@ -1,5 +1,5 @@
 /*
-	eeprom_tests.h - methods to test Arduino EEPROM
+	nvm_tests.h - methods to test nvm methods
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -19,134 +19,141 @@
 #ifndef NVM_TESTS_H
 #define NVM_TESTS_H
 
-#include <compile_flags.h>
+#include <compile_flags/compile_flags.h>
 
 #include "../test_cases.h"
 
 #ifdef __TEST_CASES__
 
-#include <Arduino.h>
-#include <unity.h>
+	#include <Arduino.h>
+	#include <unity.h>
+	#include <nvm/generic_nvm.h>
+	#include <nvm/nvm.h>
 
-#ifndef VALID_NVM
-#define VALID_NVM 0
-#endif
+	// change to 1 only when writing code
+	#ifndef VALID_NVM
+		#define VALID_NVM 0
+	#endif
 
-#ifdef NVM_EEPROM
-#undef VALID_NVM
-#define VALID_NVM 1
-#endif
+	#ifdef NVM_EEPROM
+		#undef VALID_NVM
+		#define VALID_NVM 1
+	#endif
 
-#ifdef NVM_PREF
-#undef VALID_NVM
-#define VALID_NVM 1
-#endif
+	#ifdef NVM_PREF
+		#undef VALID_NVM
+		#define VALID_NVM 1
+	#endif
 
-#if VALID_NVM
+	#if !DEFAULT_NVM
+		#undef VALID_NVM
+		#define VALID_NVM 1
+	#endif
 
-#include "nvm/eeprom_addresses.h"
+	#if VALID_NVM
 
-#ifdef NVM_EEPROM
-#include "nvm/core_eeprom.h"
-#endif
+		#include "nvm/eeprom_addresses.h"
 
-#ifdef NVM_PREF
-#include "nvm/core_pref.h"
-#endif
+		#define BOOL_KEY		0
+		#define I8_KEY			(BOOL_KEY + BYTE1_SIZE)
+		#define U8_KEY			(I8_KEY + BYTE1_SIZE)
+		#define I16_KEY			(U8_KEY + BYTE1_SIZE)
+		#define U16_KEY			(I16_KEY + BYTE2_SIZE)
+		#define I32_KEY			(U16_KEY + BYTE2_SIZE)
+		#define U32_KEY			(I32_KEY + BYTE4_SIZE)
+		#define I64_KEY			(U32_KEY + BYTE4_SIZE)
+		#define U64_KEY			(I64_KEY + BYTE8_SIZE)
+		#define FLOAT_KEY		(U64_KEY + BYTE8_SIZE)
+		#define DOUBLE_KEY		(FLOAT_KEY + BYTE8_SIZE)
+		#define CHAR_ARRAY_KEY	(DOUBLE_KEY + BYTE8_SIZE)
 
-#define BOOL_KEY		0
-#define I8_KEY			(BOOL_KEY + BYTE1_SIZE)
-#define U8_KEY			(I8_KEY + BYTE1_SIZE)
-#define I16_KEY			(U8_KEY + BYTE1_SIZE)
-#define U16_KEY			(I16_KEY + BYTE2_SIZE)
-#define I32_KEY			(U16_KEY + BYTE2_SIZE)
-#define U32_KEY			(I32_KEY + BYTE4_SIZE)
-#define I64_KEY			(U32_KEY + BYTE4_SIZE)
-#define U64_KEY			(I64_KEY + BYTE8_SIZE)
-#define FLOAT_KEY		(U64_KEY + BYTE8_SIZE)
-#define DOUBLE_KEY		(FLOAT_KEY + BYTE8_SIZE)
-#define CHAR_ARRAY_KEY	(DOUBLE_KEY + BYTE8_SIZE)
+		#define ACCEPT_EMPTY_FAIL_STR "Accept empty"
+		#define BAD_SIZE_FAIL_STR "Bad size"
+		#define CALL_INIT_FAIL_STR "Call testNVMInit"
+		#define DEFAULTED_FAIL_STR "Default"
+		#define GET_FAIL_STR "Fail get"
+		#define INIT_FAIL_STR "Init fail"
+		#define INIT_TESTED_IGNORE_STR "NVM Tested"
+		#define NVM_STARTED_FAIL_STR "NVM started"
+		#define NOT_INIT_FAIL_STR "Not init"
+		#define NO_NULL_FAIL_STR "No NULL"
+		#define SIZE_0_FAIL_STR "Size 0"
+		#define UNEQUAL_FAIL_STR "Unequal"
+		#define WRITE_FAIL_STR "Fail write"
 
-/**
- * Sets up NVM testing suite
- * 
- * @param nvmSize size of NVM storage
- */
-void setupNVMTests(uint16_t nvmSize);
+		/**
+		 * Tests if NVM can be initialized properly
+		 */
+		void testNVMInit();
 
-/**
- * Tests if NVM can be initialized properly
- */
-void testNVMInit();
+		/**
+		 * Tests if writing and getting Bool works
+		 */
+		void testNVMBool();
 
-/**
- * Tests if writing and getting Bool works
- */
-void testNVMBool();
+		/**
+		 * Tests if writing and getting i8 works
+		 */
+		void testNVMi8();
 
-/**
- * Tests if writing and getting i8 works
- */
-void testNVMi8();
+		/**
+		 * Tests if writing and getting u8 works
+		 */
+		void testNVMu8();
 
-/**
- * Tests if writing and getting u8 works
- */
-void testNVMu8();
+		/**
+		 * Tests if writing and getting i16 works
+		 */
+		void testNVMi16();
 
-/**
- * Tests if writing and getting i16 works
- */
-void testNVMi16();
+		/**
+		 * Tests if writing and getting u16 works
+		 */
+		void testNVMu16();
 
-/**
- * Tests if writing and getting u16 works
- */
-void testNVMu16();
+		/**
+		 * Tests if writing and getting i32 works
+		 */
+		void testNVMi32();
 
-/**
- * Tests if writing and getting i32 works
- */
-void testNVMi32();
+		/**
+		 * Tests if writing and getting u32 works
+		 */
+		void testNVMu32();
 
-/**
- * Tests if writing and getting u32 works
- */
-void testNVMu32();
+		/**
+		 * Tests if writing and getting i64 works
+		 */
+		void testNVMi64();
 
-/**
- * Tests if writing and getting i64 works
- */
-void testNVMi64();
+		/**
+		 * Tests if writing and getting u64 works
+		 */
+		void testNVMu64();
 
-/**
- * Tests if writing and getting u64 works
- */
-void testNVMu64();
+		/**
+		 * Tests if writing and getting float works
+		 */
+		void testNVMFloat();
 
-/**
- * Tests if writing and getting float works
- */
-void testNVMFloat();
+		/**
+		 * Tests if writing and getting double works
+		 */
+		void testNVMDouble();
 
-/**
- * Tests if writing and getting double works
- */
-void testNVMDouble();
+		#ifndef NO_CHAR_ARRAY_SUPPORT
+		/**
+		 * Tests if writing and getting char array works
+		 */
+		void testNVMCharArray();
+		#endif
 
-#ifndef NO_CHAR_ARRAY_SUPPORT
-/**
- * Tests if writing and getting char array works
- */
-void testNVMCharArray();
-#endif
+		/**
+		 * Tests all nvm tests at once
+		 */
+		void testNVM();
 
-/**
- * Tests all nvm tests at once
- */
-void testNVM();
-
-#endif
+	#endif
 
 #endif
 #endif

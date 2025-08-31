@@ -19,26 +19,37 @@
 #ifndef TEST_CASES_H
 #define TEST_CASES_H
 
-//#include "compile_flags.h"
-
 #ifndef __TEST_CASES__
 /**
- * Undefine only when writing code
+ * Define only when writing code
  */
 //#define __TEST_CASES__
 #endif
 
-/**
- * Removes debug statements from displaying and consuming resources
- */
 #ifdef __TEST_CASES__
 
-#undef __ERROR_DEBUG__
-#undef __NVM_DEBUG__
-#undef __TAG_DEBUG__
+#include <Arduino.h>
+#include <unity.h>
 
 // delay to allow serial connection to board
 #define SERIAL_DELAY 2000
+
+// data type for progmem char arrays
+typedef const PROGMEM char memCharString;
+
+/**
+ * Writes ignore message
+ * 
+ * @param message flash message to print
+ */
+void printIgnore(memCharString *message);
+
+/**
+ * Writes fail message
+ * 
+ * @param message flash message to print
+ */
+void printFail(memCharString *message);
 
 #endif
 #endif

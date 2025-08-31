@@ -1,5 +1,5 @@
 /*
-	eeprom_tests.cpp - methods to test Arduino EEPROM
+	nvm.cpp - methods to test nvm methods
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -22,37 +22,48 @@
 
 #include "nvm_tests.h"
 
-uint16_t tnvmSize = 0U;
-bool tInitTested = false;
-
 #if VALID_NVM
 
-typedef const char charString;
+#ifndef NVM_SIZE
+	#define NVM_SIZE DEFAULT_NVM_SIZE
+#endif
 
-charString callSetup[] PROGMEM = {"Call setupNVMTests"};
-charString callInit[] PROGMEM = {"Call testNVMInit"};
-charString failPut[] PROGMEM = {"Fail put"};
-charString failGet[] PROGMEM = {"Fail get"};
-charString defaulted[] PROGMEM = {"Default"};
-charString initTested[] PROGMEM = {"Init Tested"};
-charString unequal[] PROGMEM = {"Unequal"};
-charString size0[] PROGMEM = {"Size 0"};
-charString notInit[] PROGMEM = {"Not init"};
-charString initFail[] PROGMEM = {"Init fail"};
-charString badSize[] PROGMEM = {"Bad size"};
-charString nvmStarted[] PROGMEM = {"NVM started"};
-charString noNull[] PROGMEM = {"No NULL"};
-charString acceptEmpty[] PROGMEM = {"Accept empty"};
+memCharString acceptEmptyFail[] = {ACCEPT_EMPTY_FAIL_STR};
+memCharString badSizeFail[] = {BAD_SIZE_FAIL_STR};
+memCharString callInitFail[] = {CALL_INIT_FAIL_STR};
+memCharString defaultedFail[] = {DEFAULTED_FAIL_STR};
+memCharString getFail[] = {GET_FAIL_STR};
+memCharString initFail[] = {INIT_FAIL_STR};
+memCharString initTestedIgnore[] = {INIT_TESTED_IGNORE_STR};
+memCharString nvmStartedFail[] = {NVM_STARTED_FAIL_STR};
+memCharString notInitFail[] = {NOT_INIT_FAIL_STR};
+memCharString noNullFail[] = {NO_NULL_FAIL_STR};
+memCharString size0Fail[] = {SIZE_0_FAIL_STR};
+memCharString unequalFail[] = {UNEQUAL_FAIL_STR};
+memCharString writeFail[] = {WRITE_FAIL_STR};
+
+/**
+ * Tests if nvm is started
+ */
+bool nvmInitialized(void) {
+
+	enum NVMStartCode code;
+
+	// test if nvm started
+	code = nvmInit(DEFAULT_NVM_SIZE);
+
+	if (code == NVM_STARTED) {
+		return true;
+	}
+	return false;
+}
 
 /**
  * Prints nvm not started message
  */
 void nvmNotStarted() {
-	if (tnvmSize == DEFAULT_NVM_SIZE) {
-		TEST_FAIL_MESSAGE(callSetup);
-	}
-	if (!tInitTested) {
-		TEST_FAIL_MESSAGE(callInit);
+	if (!nvmInitialized()) {
+		printFail(callInitFail);
 	}
 }
 
@@ -62,7 +73,7 @@ void nvmNotStarted() {
 template <typename T> void writeValue(uint16_t address, T value) {
 	bool success = nvmWriteValue(address, value);
 	if (!success) {
-		TEST_FAIL_MESSAGE(failPut);
+		printFail(writeFail);
 	}
 }
 
@@ -72,7 +83,7 @@ template <typename T> void writeValue(uint16_t address, T value) {
 template <typename T> void getValue(uint16_t address, T *value) {
 	bool success = nvmGetValue(address, value);
 	if (!success) {
-		TEST_FAIL_MESSAGE(failGet);
+		printFail(getFail);
 	}
 }
 
@@ -92,10 +103,10 @@ void testInt(uint16_t key, T value, T defaultValue, bool canDefault) {
 	writeValue(key, value);
 	getValue(key, &result);
 	if (value != result) {
-		TEST_FAIL_MESSAGE(unequal);
+		printFail(unequalFail);
 	}
 	if (!canDefault && value == defaultValue) {
-		TEST_FAIL_MESSAGE(defaulted);
+		printFail(defaultedFail);
 	}
 }
 
@@ -132,17 +143,10 @@ void testIntType(uint16_t key, T min, T max, T defaultValue) {
 	testInt(key, min, defaultValue, CAN_NOT_DEFAULT);
 }
 
-void setupNVMTests(uint16_t nvmSizeNew) {
-	if (tnvmSize != DEFAULT_NVM_SIZE) {
-		return;
-	}
-	tnvmSize = nvmSizeNew;
-}
-
 void testNVMInit() {
 
-	if (tInitTested) {
-		TEST_IGNORE_MESSAGE(initTested);
+	if (nvmInitialized()) {
+		printIgnore(initTestedIgnore);
 	}
 
 	uint8_t result;
@@ -150,43 +154,41 @@ void testNVMInit() {
 	bool valid;
 
 	// test initialization with size 0
-	code = nvmInit(0U);
+	code = nvmInit(DEFAULT_NVM_SIZE);
 	if (code != NVM_INVALID_SIZE) {
-		TEST_FAIL_MESSAGE(size0);
+		printFail(size0Fail);
 	}
 
 	// tests getting/writing value prematurely
 	valid = nvmGetValue(U8_KEY, &result);
 	if (valid) {
-		TEST_FAIL_MESSAGE(notInit);
+		printFail(notInitFail);
 	}
 	valid = nvmWriteValue(U8_KEY, (uint8_t)0);
 	if (valid) {
-		TEST_FAIL_MESSAGE(notInit);
+		printFail(notInitFail);
 	}
 
 	// tests starting nvm
-	code = nvmInit(tnvmSize);
+	code = nvmInit(NVM_SIZE);
 	if (code == NVM_STARTED) {
-		TEST_FAIL_MESSAGE(nvmStarted);
+		printFail(nvmStartedFail);
 	}
 	else if (code == NVM_FAILED) {
-		TEST_FAIL_MESSAGE(initFail);
+		printFail(initFail);
 	}
 	else if (code == NVM_INVALID_SIZE) {
-		TEST_FAIL_MESSAGE(badSize);
+		printFail(badSizeFail);
 	}
 	else if (code != NVM_OK) {
 		TEST_FAIL();
 	}
 
 	// tests trying to start again
-	code = nvmInit(tnvmSize);
+	code = nvmInit(NVM_SIZE);
 	if (code != NVM_STARTED) {
-		TEST_FAIL_MESSAGE(nvmStarted);
+		printFail(nvmStartedFail);
 	}
-
-	tInitTested = true;
 }
 
 void testNVMBool() {
@@ -250,31 +252,31 @@ void testNVMCharArray() {
 
 	valid = nvmWriteValue(CHAR_ARRAY_KEY, nullPtr, 1);
 	if (valid) {
-		TEST_FAIL_MESSAGE(noNull);
+		printFail(noNullFail);
 	}
 
 	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, 0);
 	if (valid) {
-		TEST_FAIL_MESSAGE(size0);
+		printFail(size0Fail);
 	}
 
 	valid = nvmWriteValue(CHAR_ARRAY_KEY, emptyVal, 1);
 	if (!valid) {
-		TEST_FAIL_MESSAGE(acceptEmpty);
+		printFail(acceptEmptyFail);
 	}
 
 	valid = nvmGetValue(CHAR_ARRAY_KEY, smallOutput, 1);
 	if (!valid) {
-		TEST_FAIL_MESSAGE(acceptEmpty);
+		printFail(acceptEmptyFail);
 	}
 
 	if (!sameString(smallOutput, emptyVal)) {
-		TEST_FAIL_MESSAGE(unequal);
+		printFail(unequalFail);
 	}
 
 	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, 2);
 	if (valid) {
-		TEST_FAIL_MESSAGE(badSize);
+		printFail(badSizeFail);
 	}
 
 	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, charSize);
@@ -284,17 +286,17 @@ void testNVMCharArray() {
 
 	valid = nvmGetValue(CHAR_ARRAY_KEY, nullPtr, 0);
 	if (valid) {
-		TEST_FAIL_MESSAGE(noNull);
+		printFail(noNullFail);
 	}
 
 	valid = nvmGetValue(CHAR_ARRAY_KEY, smallOutput, 0);
 	if (valid) {
-		TEST_FAIL_MESSAGE(size0);
+		printFail(size0Fail);
 	}
 
 	valid = nvmGetValue(CHAR_ARRAY_KEY, output, 2);
 	if (valid) {
-		TEST_FAIL_MESSAGE(badSize);
+		printFail(badSizeFail);
 	}
 
 	valid = nvmGetValue(CHAR_ARRAY_KEY, output, charSize);
@@ -303,13 +305,14 @@ void testNVMCharArray() {
 	}
 
 	if (!sameString(output, testVal)) {
-		TEST_FAIL_MESSAGE(unequal);
+		printFail(unequalFail);
 	}
 }
 
 #endif
 
 void testNVM() {
+	RUN_TEST(&testNVMInit);
 	RUN_TEST(&testNVMInit);
 	RUN_TEST(&testNVMBool);
 	RUN_TEST(&testNVMi8);
