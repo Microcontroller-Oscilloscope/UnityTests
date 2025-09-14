@@ -23,9 +23,7 @@
 #include "full_test.h"
 
 void fullTest(void) {
-	#if VALID_NVM
-		testNVM();
-	#endif
+	testNVM();
 }
 
 #endif

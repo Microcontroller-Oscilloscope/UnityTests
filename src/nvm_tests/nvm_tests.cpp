@@ -22,25 +22,33 @@
 
 #include "nvm_tests.h"
 
-#if VALID_NVM
-
 #ifndef NVM_SIZE
 	#define NVM_SIZE DEFAULT_NVM_SIZE
 #endif
 
+// nvm operations error strings
 memCharString acceptEmptyFail[] = {ACCEPT_EMPTY_FAIL_STR};
-memCharString badSizeFail[] = {BAD_SIZE_FAIL_STR};
 memCharString callInitFail[] = {CALL_INIT_FAIL_STR};
 memCharString defaultedFail[] = {DEFAULTED_FAIL_STR};
 memCharString getFail[] = {GET_FAIL_STR};
-memCharString initFail[] = {INIT_FAIL_STR};
-memCharString initTestedIgnore[] = {INIT_TESTED_IGNORE_STR};
-memCharString nvmStartedFail[] = {NVM_STARTED_FAIL_STR};
-memCharString notInitFail[] = {NOT_INIT_FAIL_STR};
 memCharString noNullFail[] = {NO_NULL_FAIL_STR};
-memCharString size0Fail[] = {SIZE_0_FAIL_STR};
 memCharString unequalFail[] = {UNEQUAL_FAIL_STR};
 memCharString writeFail[] = {WRITE_FAIL_STR};
+
+// nvm init error strings
+memCharString badSizeFail[] = {BAD_SIZE_FAIL_STR};
+memCharString initFail[] = {INIT_FAIL_STR};
+memCharString initTestedIgnore[] = {INIT_TESTED_IGNORE_STR};
+memCharString notInitFail[] = {NOT_INIT_FAIL_STR};
+memCharString nvmStartedFail[] = {NVM_STARTED_FAIL_STR};
+memCharString size0Fail[] = {SIZE_0_FAIL_STR};
+
+// nvm set default error strings
+memCharString defaultClearFail[] = {DEFAULT_CLEAR_FAIL_STR};
+memCharString defaultMaxSizeFail[] = {DEFAULT_MAX_SIZE_FAIL_STR};
+memCharString defaultMaxSizeUnknownFail[] = {DEFAULT_MAX_SIZE_UNKNOWN_FAIL_STR};
+memCharString defaultSizeTooBigFail[] = {DEFAULT_SIZE_TOO_BIG_FAIL_STR};
+memCharString defaultWriteFail[] = {DEFAULT_WRITE_FAIL_STR};
 
 /**
  * Tests if nvm is started
@@ -145,17 +153,29 @@ void testIntType(uint16_t key, T min, T max, T defaultValue) {
 
 void testNVMInit() {
 
+	uint8_t result;
+	enum NVMStartCode startCode;
+	NVMDefaultCode defaultCode;
+	bool valid;
+
+	/**
+	 * Tests before nvm start
+	 */
+
+	// test if nvm started successfully
 	if (nvmInitialized()) {
 		printIgnore(initTestedIgnore);
 	}
 
-	uint8_t result;
-	enum NVMStartCode code;
-	bool valid;
+	// test setting default when nvm not started
+	defaultCode = nvmSetDefaults();
+	if (defaultCode != NVM_DEFAULT_FAIL_MAX_SIZE) {
+		printFail(defaultMaxSizeFail);
+	}
 
 	// test initialization with size 0
-	code = nvmInit(DEFAULT_NVM_SIZE);
-	if (code != NVM_INVALID_SIZE) {
+	startCode = nvmInit(DEFAULT_NVM_SIZE);
+	if (startCode != NVM_INVALID_SIZE) {
 		printFail(size0Fail);
 	}
 
@@ -170,24 +190,49 @@ void testNVMInit() {
 	}
 
 	// tests starting nvm
-	code = nvmInit(NVM_SIZE);
-	if (code == NVM_STARTED) {
+	startCode = nvmInit(NVM_SIZE);
+	if (startCode == NVM_STARTED) {
 		printFail(nvmStartedFail);
 	}
-	else if (code == NVM_FAILED) {
+	else if (startCode == NVM_FAILED) {
 		printFail(initFail);
 	}
-	else if (code == NVM_INVALID_SIZE) {
+	else if (startCode == NVM_INVALID_SIZE) {
 		printFail(badSizeFail);
 	}
-	else if (code != NVM_OK) {
+	else if (startCode != NVM_OK) {
 		TEST_FAIL();
 	}
 
+	/**
+	 * Tests after nvm start
+	 */
+
 	// tests trying to start again
-	code = nvmInit(NVM_SIZE);
-	if (code != NVM_STARTED) {
+	startCode = nvmInit(NVM_SIZE);
+	if (startCode != NVM_STARTED) {
 		printFail(nvmStartedFail);
+	}
+
+	// tests setting defaults
+	defaultCode = nvmSetDefaults();
+	if (defaultCode == NVM_DEFAULT_SIZE_TOO_BIG) {
+		printFail(defaultSizeTooBigFail);
+	}
+	else if (defaultCode == NVM_DEFAULT_FAIL_MAX_SIZE) {
+		printFail(defaultMaxSizeUnknownFail);
+	}
+	else if (defaultCode == NVM_DEFAULT_FAIL_CLEAR) {
+		printFail(defaultClearFail);
+	}
+	else if (defaultCode == NVM_DEFAULT_FAIL_WRITE) {
+		printFail(defaultWriteFail);
+	}
+	else if (defaultCode == NVM_DEFAULT_FAIL_STOP) {
+		printFail("stop");
+	}
+	else if (defaultCode == NVM_DEFAULT_FAIL_INIT) {
+		printFail("init");
 	}
 }
 
@@ -237,11 +282,16 @@ void testNVMDouble() {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
+// test to verify testing strings are within bounds
+static_assert(CHAR_ARRAY_MAX_SIZE > 0, "CHAR_ARRAY_MAX_SIZE needs to be greater than 0");
+static_assert(sizeof(TEST_STRING) <= CHAR_ARRAY_MAX_SIZE, "Test string too large or \
+		CHAR_ARRAY_MAX_SIZE too small");
+
 void testNVMCharArray() {
 
 	nvmNotStarted();
 
-	char *testVal = (char*)"test";
+	char *testVal = (char*)TEST_STRING;
 	uint8_t charSize = charArraySize(testVal);
 
 	char *nullPtr = nullptr;
@@ -330,5 +380,4 @@ void testNVM() {
 	#endif
 }
 
-#endif
 #endif

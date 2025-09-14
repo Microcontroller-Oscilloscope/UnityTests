@@ -16,15 +16,40 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+#ifndef FULL_TEST_H
+#define FULL_TEST_H
+
 #include "test_cases.h"
 
 #ifdef __TEST_CASES__
 
-#include <Arduino.h>
-#include <unity.h>
+	#include <Arduino.h>
+	#include <unity.h>
 
-#include "nvm_tests/nvm_tests.h"
+	void fullTest(void);
 
-void fullTest(void);
+	/****************************
+	 * Size Config
+	****************************/
+
+	#include "nvm_tests/nvm_tests.h"
+
+	// tests if final key is found
+	#ifndef TEST_NVM_END_KEY
+		#error TEST_NVM_END_KEY not found
+	#endif
+
+	// tests if NVM_SIZE is found
+	#ifndef NVM_SIZE
+		#error NVM_SIZE not found
+	#endif
+
+	#define NVM_TEST_SIZE TEST_NVM_END_KEY
+
+	#if NVM_TEST_SIZE > NVM_SIZE
+		#error NVM_SIZE not large enough for testing
+	#endif
+
+#endif
 
 #endif

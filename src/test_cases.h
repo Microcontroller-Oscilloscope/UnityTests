@@ -19,11 +19,20 @@
 #ifndef TEST_CASES_H
 #define TEST_CASES_H
 
-#ifndef __TEST_CASES__
+// version of microcontroller oscilloscope unity tests
+#define OSC_TEST_MAJOR_VERSION 0
+#define OSC_TEST_MINOR_VERSION 2
+#define OSC_TEST_PATCH_VERSION 0
+
 /**
  * Define only when writing code
  */
-//#define __TEST_CASES__
+//#define INSPECT_TEST_CASES
+
+#ifdef INSPECT_TEST_CASES
+	#ifndef __TEST_CASES__
+		#define __TEST_CASES__
+	#endif
 #endif
 
 #ifdef __TEST_CASES__
