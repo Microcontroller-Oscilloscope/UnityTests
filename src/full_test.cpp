@@ -16,14 +16,8 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "test_cases.h"
-
-#ifdef __TEST_CASES__
-
 #include "full_test.h"
 
 void fullTest(void) {
 	testNVM();
 }
-
-#endif

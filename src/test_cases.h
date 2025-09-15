@@ -19,23 +19,12 @@
 #ifndef TEST_CASES_H
 #define TEST_CASES_H
 
+#include <compile_flags/compile_flags.h>
+
 // version of microcontroller oscilloscope unity tests
 #define OSC_TEST_MAJOR_VERSION 0
 #define OSC_TEST_MINOR_VERSION 2
 #define OSC_TEST_PATCH_VERSION 0
-
-/**
- * Define only when writing code
- */
-//#define INSPECT_TEST_CASES
-
-#ifdef INSPECT_TEST_CASES
-	#ifndef __TEST_CASES__
-		#define __TEST_CASES__
-	#endif
-#endif
-
-#ifdef __TEST_CASES__
 
 #include <Arduino.h>
 #include <unity.h>
@@ -59,6 +48,4 @@ void printIgnore(memCharString *message);
  * @param message flash message to print
  */
 void printFail(memCharString *message);
-
-#endif
 #endif

@@ -16,15 +16,7 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#include "../test_cases.h"
-
-#ifdef __TEST_CASES__
-
 #include "nvm_tests.h"
-
-#ifndef NVM_SIZE
-	#define NVM_SIZE DEFAULT_NVM_SIZE
-#endif
 
 // nvm operations error strings
 memCharString acceptEmptyFail[] = {ACCEPT_EMPTY_FAIL_STR};
@@ -379,5 +371,3 @@ void testNVM() {
 		RUN_TEST(&testNVMCharArray);
 	#endif
 }
-
-#endif

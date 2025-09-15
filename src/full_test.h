@@ -20,36 +20,26 @@
 #define FULL_TEST_H
 
 #include "test_cases.h"
+#include <Arduino.h>
+#include <unity.h>
 
-#ifdef __TEST_CASES__
+void fullTest(void);
 
-	#include <Arduino.h>
-	#include <unity.h>
+/****************************
+ * NVM Size Config
+****************************/
 
-	void fullTest(void);
+#include "nvm_tests/nvm_tests.h"
 
-	/****************************
-	 * Size Config
-	****************************/
+// tests if final key is found
+#ifndef TEST_NVM_END_KEY
+	#error TEST_NVM_END_KEY not found
+#endif
 
-	#include "nvm_tests/nvm_tests.h"
+#define NVM_TEST_SIZE TEST_NVM_END_KEY
 
-	// tests if final key is found
-	#ifndef TEST_NVM_END_KEY
-		#error TEST_NVM_END_KEY not found
-	#endif
-
-	// tests if NVM_SIZE is found
-	#ifndef NVM_SIZE
-		#error NVM_SIZE not found
-	#endif
-
-	#define NVM_TEST_SIZE TEST_NVM_END_KEY
-
-	#if NVM_TEST_SIZE > NVM_SIZE
-		#error NVM_SIZE not large enough for testing
-	#endif
-
+#if NVM_TEST_SIZE > NVM_SIZE
+	#error NVM_SIZE not large enough for testing
 #endif
 
 #endif
