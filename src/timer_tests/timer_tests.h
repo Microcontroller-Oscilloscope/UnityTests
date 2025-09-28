@@ -21,13 +21,9 @@
 
 #include <compile_flags/compile_flags.h>
 
-#if NUM_TIMERS > 0
-
 /**
  * Tests all timer tests at once
  */
 void testTimers();
-
-#endif
 
 #endif

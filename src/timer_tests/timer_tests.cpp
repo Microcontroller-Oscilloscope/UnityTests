@@ -17,11 +17,10 @@
 */
 
 #include "timer_tests.h"
+#include "../test_cases.h"
 
 #if NUM_TIMERS > 0
 
-#include "../test_cases.h"
-#include <compile_flags/compile_flags.h>
 #include <timer.h>
 
 #define HARD_TIMER_TEST_INDEX HARD_TIMER_LED_INDEX // hardware timer index for testing
@@ -167,4 +166,15 @@ void testTimers() {
 	RUN_TEST(&testRepeatDeconstruct);
 }
 
+#else
+
+memCharString passIgnore[] = {"Ignoring timer tests"};
+
+void passTimers() {
+	printIgnore(passIgnore);
+}
+
+void testTimers() {
+	RUN_TEST(&passTimers);
+}
 #endif
