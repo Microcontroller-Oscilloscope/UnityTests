@@ -91,6 +91,9 @@
 #define HARD_TIMER_TEST_MULTIPLIER HARD_TIMER_LED_TICK_MULTIPLIER // multiplier for testing
 
 #define HARD_TIMER_TEST_DELAY_MS 100 // delay for each iteration of timer
+#define HARD_TIMER_TEST_DELAY_ELLAPSE 1000 // time for timer to run for
+#define HARD_TIMER_TEST_COUNT_TARGET HARD_TIMER_TEST_DELAY_ELLAPSE / HARD_TIMER_TEST_DELAY_MS // target count for timer
+#define HARD_TIMER_TEST_COUNT_BUFFER 1 // amount timer can be off of goal
 
 /**
  * Initializes testing timer
@@ -130,7 +133,6 @@ memCharString cancelFail[] = {"Stop"};
 memCharString recancelFail[] = {"Restop"};
 memCharString deconstructFail[] = {"Decon"};
 memCharString redeconstructFail[] = {"Redecon"};
-
 
 
 memCharString path00toIFail[] = {"00>I"};
@@ -185,10 +187,13 @@ memCharString path11toSFail[] = {"11>S"};
 memCharString paths11toSFail[] = {"S11>S"};
 memCharString pathi11toSFail[] = {"I11>S"};
 
+uint32_t hardTimerCount = 0U;
+
 /**
  * Testing function
  */
 HARD_TIMER_TEST_FUNCTION() {
+	hardTimerCount++;
 	HARD_TIMER_END();
 }
 
@@ -475,6 +480,19 @@ void testPathFlags() {
 	testGetState(HARD_TIMER_TEST, false, false);
 }
 
+void testTiming() {
+
+	testGetState(HARD_TIMER_TEST, false, false);
+	hardTimerCount = 0U;
+
+	INIT_TIMER();
+	SET_TIMER();
+	delay(HARD_TIMER_TEST_DELAY_ELLAPSE);
+	DECONSTRUCT_TIMER();
+
+	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_TEST_COUNT_BUFFER, HARD_TIMER_TEST_COUNT_TARGET, hardTimerCount);
+}
+
 void testTimers() {
 	RUN_TEST(&testProgramStart);
 	RUN_TEST(&testRepeatInit);
@@ -482,6 +500,7 @@ void testTimers() {
 	RUN_TEST(&testRepeatCancel);
 	RUN_TEST(&testRepeatDeconstruct);
 	RUN_TEST(&testPathFlags);
+	RUN_TEST(&testTiming);
 }
 
 #else
