@@ -83,17 +83,18 @@
 
 #include <timer.h>
 
-#define HARD_TIMER_TEST_INDEX HARD_TIMER_LED_INDEX // hardware timer index for testing
+/****************************
+ * Slow Timer Defines
+****************************/
+
 #define HARD_TIMER_TEST HARD_TIMER(HARD_TIMER_TEST_INDEX) // hardware timer for testing
 #define HARD_TIMER_TEST_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_TEST_INDEX) // starter function for testing
 #define HARD_TIMER_TEST_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_TEST_INDEX) // reference for testing function
-#define HARD_TIMER_TEST_SCALAR HARD_TIMER_LED_SCALAR // pre scalar for testing
-#define HARD_TIMER_TEST_MULTIPLIER HARD_TIMER_LED_TICK_MULTIPLIER // multiplier for testing
 
 #define HARD_TIMER_TEST_DELAY_MS 100 // delay for each iteration of timer
-#define HARD_TIMER_TEST_DELAY_ELLAPSE 1000 // time for timer to run for
-#define HARD_TIMER_TEST_COUNT_TARGET HARD_TIMER_TEST_DELAY_ELLAPSE / HARD_TIMER_TEST_DELAY_MS // target count for timer
-#define HARD_TIMER_TEST_COUNT_BUFFER 1 // amount timer can be off of goal
+#define HARD_TIMER_TEST_DELAY_ELLAPSE_MS 1000 // time for timer to run for
+#define HARD_TIMER_TEST_COUNT_TARGET HARD_TIMER_TEST_DELAY_ELLAPSE_MS / HARD_TIMER_TEST_DELAY_MS // target count for timer
+#define HARD_TIMER_TEST_COUNT_BUFFER 0 // amount timer can be off of goal
 
 /**
  * Initializes testing timer
@@ -122,6 +123,42 @@
  * @return bool: if deconstruct successful
  */
 #define DECONSTRUCT_TIMER() deconstructHardTimer(HARD_TIMER_TEST)
+
+/****************************
+ * Fast Timer Defines
+****************************/
+
+#define HARD_TIMER_FAST_TEST HARD_TIMER(HARD_TIMER_FAST_TEST_INDEX) // hardware timer for testing
+#define HARD_TIMER_FAST_TEST_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_FAST_TEST_INDEX) // starter function for testing
+#define HARD_TIMER_FAST_TEST_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_FAST_TEST_INDEX) // reference for testing function
+
+/**
+ * Initializes testing timer
+ * 
+ * @return bool: if initialization successful
+ */
+#define INIT_FAST_TIMER() initHardTimer(HARD_TIMER_FAST_TEST, &HARD_TIMER_FAST_TEST_REFERENCE, HARD_TIMER_FAST_TEST_SCALAR)
+
+/**
+ * Sets testing timer
+ * 
+ * @return bool: if set successful
+ */
+#define SET_FAST_TIMER() setHardTimer(HARD_TIMER_FAST_TEST, &HARD_TIMER_FAST_TEST_REFERENCE, HARD_TIMER_FAST_TEST_SCALAR, HARD_TIMER_FAST_TEST_MULTIPLIER * HARD_TIMER_FAST_TEST_DELAY)
+
+/**
+ * Cancels testing timer
+ * 
+ * @return bool: if set successful
+ */
+#define CANCEL_FAST_TIMER() cancelHardTimer(HARD_TIMER_FAST_TEST)
+
+/**
+ * Decontructs testing timer
+ * 
+ * @return bool: if deconstruct successful
+ */
+#define DECONSTRUCT_FAST_TIMER() deconstructHardTimer(HARD_TIMER_FAST_TEST)
 
 memCharString invalidInitFail[] = {"Init State"};
 memCharString invalidStartFail[] = {"Start State"};
@@ -187,7 +224,7 @@ memCharString path11toSFail[] = {"11>S"};
 memCharString paths11toSFail[] = {"S11>S"};
 memCharString pathi11toSFail[] = {"I11>S"};
 
-uint32_t hardTimerCount = 0U;
+volatile uint32_t hardTimerCount = 0U;
 
 /**
  * Testing function
@@ -340,33 +377,6 @@ void testRepeatDeconstruct() {
  * Tests for all possible flag paths
  */
 void testPathFlags() {
-	/**
-	 * base: configuration when timer hasn't been touched since startup
-	 * init: initHardTimer function
-	 * deconstruct: deconstructHardTimer function
-	 * cancel: cancelHardTimer function
-	 * set: setHardTimer function
-	 * 
-	 * Valid paths:
-	 * 
-	 * base/deconstruct -> init
-	 * init/cancel -> deconstruct
-	 * init/cancel -> set
-	 * set -> cancel
-	 * set -> deconstruct
-	 * 
-	 * Invalid paths:
-	 * 
-	 * base/deconstruct -> deconstruct
-	 * base/deconstruct -> cancel
-	 * base/deconstruct -> set
-	 * 
-	 * init/cancel -> init
-	 * init/cancel -> cancel
-	 * 
-	 * set -> set
-	 * set -> init
-	 */
 
 	/**
 	 * (0,0)
@@ -485,12 +495,42 @@ void testTiming() {
 	testGetState(HARD_TIMER_TEST, false, false);
 	hardTimerCount = 0U;
 
-	INIT_TIMER();
-	SET_TIMER();
-	delay(HARD_TIMER_TEST_DELAY_ELLAPSE);
-	DECONSTRUCT_TIMER();
+	if (!INIT_TIMER()) {
+		printFail(initFail);
+	}
+	if (!SET_TIMER()) {
+		printFail(startFail);
+	}
+
+	delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	if (!DECONSTRUCT_TIMER()) {
+		printFail(deconstructFail);
+	}
 
 	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_TEST_COUNT_BUFFER, HARD_TIMER_TEST_COUNT_TARGET, hardTimerCount);
+}
+
+void testFastTiming() {
+
+	// ensure slow timing works first
+	testTiming();
+
+	testGetState(HARD_TIMER_FAST_TEST, false, false);
+	hardTimerCount = 0U;
+
+	if (!INIT_FAST_TIMER()) {
+		printFail(initFail);
+	}
+	if (!SET_FAST_TIMER()) {
+		printFail(startFail);
+	}
+
+	delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	if (!DECONSTRUCT_FAST_TIMER()) {
+		printFail(deconstructFail);
+	}
+
+	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_FAST_TEST_COUNT_BUFFER, HARD_TIMER_FAST_TEST_COUNT_TARGET, hardTimerCount);
 }
 
 void testTimers() {
@@ -501,6 +541,7 @@ void testTimers() {
 	RUN_TEST(&testRepeatDeconstruct);
 	RUN_TEST(&testPathFlags);
 	RUN_TEST(&testTiming);
+	RUN_TEST(&testFastTiming);
 }
 
 #else
