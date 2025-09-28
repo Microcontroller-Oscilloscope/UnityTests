@@ -16,6 +16,66 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+/**
+ * All timer paths
+ * 
+ * base: configuration when timer hasn't been touched since startup
+ * init: initHardTimer function
+ * deconstruct: deconstructHardTimer function
+ * cancel: cancelHardTimer function
+ * set: setHardTimer function
+ * 
+ * Valid paths:
+ * 
+ * base/deconstruct -> init
+ * init/cancel -> deconstruct
+ * init/cancel -> set
+ * set -> cancel
+ * set -> deconstruct
+ * 
+ * Invalid paths:
+ * 
+ * base/deconstruct -> deconstruct
+ * base/deconstruct -> cancel
+ * base/deconstruct -> set
+ * 
+ * init/cancel -> init
+ * init/cancel -> cancel
+ * 
+ * set -> set
+ * set -> init
+ */
+
+/**
+ * All timer paths
+ * 
+ * (x, y): x(init), y(start)
+ * 
+ * (0,0): deconstruct, base
+ * (1,0): init, set
+ * (1,1): set
+ * (0,1): NOT POSSIBLE
+ * 
+ * Valid paths:
+ * (0,0) <-> (1,0) <-> (1,1)
+ * (0,0) <- (1,1)
+ * 		OR
+ * (0,0) -> (1,0)
+ * (1,0) -> (0,0)
+ * (1,0) -> (1,1)
+ * (1,1) -> (0,0)
+ * (1,1) -> (1,0)
+ * 
+ * Invalid paths:
+ * 
+ * (0,0) -> (0,0)
+ * (0,0) -> (1,0)
+ * 
+ * (1,0) -> (1,0)
+ * 
+ * (1,1) -> (1,1)
+ */
+
 #include "timer_tests.h"
 #include "../test_cases.h"
 
@@ -71,11 +131,115 @@ memCharString recancelFail[] = {"Restop"};
 memCharString deconstructFail[] = {"Decon"};
 memCharString redeconstructFail[] = {"Redecon"};
 
+
+
+memCharString path00toIFail[] = {"00>I"};
+memCharString paths00toIFail[] = {"S00>I"};
+memCharString pathi00toIFail[] = {"I00>I"};
+
+memCharString path00toDFail[] = {"00>D"};
+memCharString paths00toDFail[] = {"S00>D"};
+memCharString pathi00toDFail[] = {"I00>D"};
+
+memCharString path00toCFail[] = {"00>C"};
+memCharString paths00toCFail[] = {"S00>C"};
+memCharString pathi00toCFail[] = {"I00>C"};
+
+memCharString path00toSFail[] = {"00>S"};
+memCharString paths00toSFail[] = {"S00>S"};
+memCharString pathi00toSFail[] = {"I00>S"};
+
+
+
+memCharString path01toIFail[] = {"01>I"};
+memCharString paths01toIFail[] = {"S01>I"};
+memCharString pathi01toIFail[] = {"I01>I"};
+
+memCharString path01toDFail[] = {"01>D"};
+memCharString paths01toDFail[] = {"S01>D"};
+memCharString pathi01toDFail[] = {"I01>D"};
+
+memCharString path01toCFail[] = {"01>C"};
+memCharString paths01toCFail[] = {"S01>C"};
+memCharString pathi01toCFail[] = {"I01>C"};
+
+memCharString path01toSFail[] = {"01>S"};
+memCharString paths01toSFail[] = {"S01>S"};
+memCharString pathi01toSFail[] = {"I01>S"};
+
+
+
+memCharString path11toIFail[] = {"11>I"};
+memCharString paths11toIFail[] = {"S11>I"};
+memCharString pathi11toIFail[] = {"I11>I"};
+
+memCharString path11toDFail[] = {"11>D"};
+memCharString paths11toDFail[] = {"S11>D"};
+memCharString pathi11toDFail[] = {"I11>D"};
+
+memCharString path11toCFail[] = {"11>C"};
+memCharString paths11toCFail[] = {"S11>C"};
+memCharString pathi11toCFail[] = {"I11>C"};
+
+memCharString path11toSFail[] = {"11>S"};
+memCharString paths11toSFail[] = {"S11>S"};
+memCharString pathi11toSFail[] = {"I11>S"};
+
 /**
  * Testing function
  */
 HARD_TIMER_TEST_FUNCTION() {
 	HARD_TIMER_END();
+}
+
+/**
+ * Tests timer init state
+ * 
+ * @param timer timer to test
+ * @param init whether timer should or shouldn't be initialized
+ */
+void testGetInitState(hardware_timer_t timer, bool init) {
+	if (timerInitialized(timer) != init) {
+		printFail(invalidInitFail);
+	}
+}
+
+/**
+ * Tests timer init state
+ * 
+ * @param timer timer to test
+ * @param init whether timer should or shouldn't be initialized
+ * @param initMessage message to print
+ */
+void testGetInitState(hardware_timer_t timer, bool init, memCharString *initMessage) {
+	if (timerInitialized(timer) != init) {
+		printFail(initMessage);
+	}
+}
+
+/**
+ * Tests timer start state
+ * 
+ * @param timer timer to test
+ * @param start whether timer should or shouldn't be started
+ */
+void testGetStartState(hardware_timer_t timer, bool start) {
+	if (timerStarted(timer) != start) {
+		printFail(invalidStartFail);
+	}
+}
+
+/**
+ * Tests timer start state
+ * 
+ * @param timer timer to test
+ * @param start whether timer should or shouldn't be started
+ * @param startMessage message to print
+ */
+void testGetStartState(hardware_timer_t timer, bool start, memCharString *startMessage) {
+	if (timerStarted(timer) != start) {
+		printFail(startMessage);
+	}
 }
 
 /**
@@ -86,13 +250,22 @@ HARD_TIMER_TEST_FUNCTION() {
  * @param start whether timer should or shouldn't be started
  */
 void testGetState(hardware_timer_t timer, bool init, bool start) {
+	testGetInitState(timer, init);
+	testGetStartState(timer, start);
+}
 
-	if (timerInitialized(timer) != init) {
-		printFail(invalidInitFail);
-	}
-	if (timerStarted(timer) != start) {
-		printFail(invalidStartFail);
-	}
+/**
+ * Tests timer states
+ * 
+ * @param timer timer to test
+ * @param init whether timer should or shouldn't be initialized
+ * @param start whether timer should or shouldn't be started
+ * @param initMessage init message to print
+ * @param startMessage start message to print
+ */
+void testGetState(hardware_timer_t timer, bool init, bool start, memCharString *initMessage, memCharString *startMessage) {
+	testGetInitState(timer, init, initMessage);
+	testGetStartState(timer, start, startMessage);
 }
 
 /**
@@ -158,12 +331,157 @@ void testRepeatDeconstruct() {
 	}
 }
 
+/**
+ * Tests for all possible flag paths
+ */
+void testPathFlags() {
+	/**
+	 * base: configuration when timer hasn't been touched since startup
+	 * init: initHardTimer function
+	 * deconstruct: deconstructHardTimer function
+	 * cancel: cancelHardTimer function
+	 * set: setHardTimer function
+	 * 
+	 * Valid paths:
+	 * 
+	 * base/deconstruct -> init
+	 * init/cancel -> deconstruct
+	 * init/cancel -> set
+	 * set -> cancel
+	 * set -> deconstruct
+	 * 
+	 * Invalid paths:
+	 * 
+	 * base/deconstruct -> deconstruct
+	 * base/deconstruct -> cancel
+	 * base/deconstruct -> set
+	 * 
+	 * init/cancel -> init
+	 * init/cancel -> cancel
+	 * 
+	 * set -> set
+	 * set -> init
+	 */
+
+	/**
+	 * (0,0)
+	 */
+	testGetState(HARD_TIMER_TEST, false, false);
+
+	// 00>D
+	if (DECONSTRUCT_TIMER()) {
+		printFail(path00toDFail);
+	}
+	testGetState(HARD_TIMER_TEST, false, false, paths00toDFail, pathi00toDFail);
+	// 00>C
+	if (CANCEL_TIMER()) {
+		printFail(path00toCFail);
+	}
+	testGetState(HARD_TIMER_TEST, false, false, paths00toCFail, pathi00toCFail);
+	// 00>S
+	if (SET_TIMER()) {
+		printFail(path00toSFail);
+	}
+	testGetState(HARD_TIMER_TEST, false, false, paths00toSFail, pathi00toSFail);
+	// 00>I
+	if (!INIT_TIMER()) {
+		printFail(path00toIFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, false, paths00toIFail, pathi00toIFail);
+
+	/**
+	 * (1,0)
+	 */
+
+	// 10>I
+	if (INIT_TIMER()) {
+		printFail(path01toIFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, false, paths01toIFail, pathi01toIFail);
+	// 10>C
+	if (CANCEL_TIMER()) {
+		printFail(path01toCFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, false, paths01toCFail, pathi01toCFail);
+	// 10>S
+	if (!SET_TIMER()) {
+		printFail(path01toSFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, true, paths01toSFail, pathi01toSFail);
+
+	/**
+	 * (1,1)
+	 */
+	
+	// 11>I
+	if (INIT_TIMER()) {
+		printFail(path11toIFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, true, paths11toIFail, pathi11toIFail);
+	// 11>S
+	if (SET_TIMER()) {
+		printFail(path11toSFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, true, paths11toSFail, pathi11toSFail);
+	// 11>C
+	if (!CANCEL_TIMER()) {
+		printFail(path11toCFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, false, paths11toCFail, pathi11toCFail);
+
+	/**
+	 * (1,0)
+	 */
+	
+	// 10>D
+	if (!DECONSTRUCT_TIMER()) {
+		printFail(path01toDFail);
+	}
+	testGetState(HARD_TIMER_TEST, false, false, paths01toDFail, pathi01toDFail);
+
+	/**
+	 * (0,0)
+	 */
+
+	// 00>I
+	if (!INIT_TIMER()) {
+		printFail(path00toIFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, false, paths00toIFail, pathi00toIFail);
+
+	/**
+	 * (1,0)
+	 */
+
+	// 10>S
+	if (!SET_TIMER()) {
+		printFail(path01toSFail);
+	}
+	testGetState(HARD_TIMER_TEST, true, true, paths01toSFail, pathi01toSFail);
+
+	/**
+	 * (1,1)
+	 */
+
+	// 11>D
+	if (!DECONSTRUCT_TIMER()) {
+		printFail(path11toDFail);
+	}
+	testGetState(HARD_TIMER_TEST, false, false, paths11toDFail, pathi11toDFail);
+
+	/**
+	 * (0,0)
+	 */
+	testGetState(HARD_TIMER_TEST, false, false);
+}
+
 void testTimers() {
 	RUN_TEST(&testProgramStart);
 	RUN_TEST(&testRepeatInit);
 	RUN_TEST(&testRepeatStart);
 	RUN_TEST(&testRepeatCancel);
 	RUN_TEST(&testRepeatDeconstruct);
+	RUN_TEST(&testPathFlags);
 }
 
 #else
