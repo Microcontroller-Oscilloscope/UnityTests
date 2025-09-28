@@ -94,7 +94,9 @@
 #define HARD_TIMER_TEST_DELAY_MS 100 // delay for each iteration of timer
 #define HARD_TIMER_TEST_DELAY_ELLAPSE_MS 1000 // time for timer to run for
 #define HARD_TIMER_TEST_COUNT_TARGET HARD_TIMER_TEST_DELAY_ELLAPSE_MS / HARD_TIMER_TEST_DELAY_MS // target count for timer
-#define HARD_TIMER_TEST_COUNT_BUFFER 0 // amount timer can be off of goal
+#ifndef HARD_TIMER_TEST_COUNT_BUFFER
+	#define HARD_TIMER_TEST_COUNT_BUFFER 0 // amount timer can be off of goal
+#endif
 
 /**
  * Initializes testing timer
