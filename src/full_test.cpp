@@ -20,4 +20,7 @@
 
 void fullTest(void) {
 	testNVM();
+	#if NUM_TIMERS > 0
+		testTimers();
+	#endif
 }

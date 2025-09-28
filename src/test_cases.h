@@ -23,7 +23,7 @@
 
 // version of microcontroller oscilloscope unity tests
 #define OSC_TEST_MAJOR_VERSION 0
-#define OSC_TEST_MINOR_VERSION 2
+#define OSC_TEST_MINOR_VERSION 3
 #define OSC_TEST_PATCH_VERSION 0
 
 #include <Arduino.h>
