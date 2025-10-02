@@ -81,7 +81,7 @@
 
 #if NUM_TIMERS > 0
 
-#include <timer.h>
+#include <hardTimer.h>
 
 /****************************
  * Slow Timer Defines
@@ -243,7 +243,7 @@ HARD_TIMER_TEST_FUNCTION() {
  * @param init whether timer should or shouldn't be initialized
  */
 void testGetInitState(hardware_timer_t timer, bool init) {
-	if (timerInitialized(timer) != init) {
+	if (hardTimerInitialized(timer) != init) {
 		printFail(invalidInitFail);
 	}
 }
@@ -256,7 +256,7 @@ void testGetInitState(hardware_timer_t timer, bool init) {
  * @param initMessage message to print
  */
 void testGetInitState(hardware_timer_t timer, bool init, memCharString *initMessage) {
-	if (timerInitialized(timer) != init) {
+	if (hardTimerInitialized(timer) != init) {
 		printFail(initMessage);
 	}
 }
@@ -268,7 +268,7 @@ void testGetInitState(hardware_timer_t timer, bool init, memCharString *initMess
  * @param start whether timer should or shouldn't be started
  */
 void testGetStartState(hardware_timer_t timer, bool start) {
-	if (timerStarted(timer) != start) {
+	if (hardTimerStarted(timer) != start) {
 		printFail(invalidStartFail);
 	}
 }
@@ -281,7 +281,7 @@ void testGetStartState(hardware_timer_t timer, bool start) {
  * @param startMessage message to print
  */
 void testGetStartState(hardware_timer_t timer, bool start, memCharString *startMessage) {
-	if (timerStarted(timer) != start) {
+	if (hardTimerStarted(timer) != start) {
 		printFail(startMessage);
 	}
 }
