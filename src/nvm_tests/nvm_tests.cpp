@@ -61,7 +61,7 @@ bool nvmInitialized(void) {
 /**
  * Prints nvm not started message
  */
-void nvmNotStarted() {
+void nvmNotStarted(void) {
 	if (!nvmInitialized()) {
 		printFail(callInitFail);
 	}
@@ -69,9 +69,14 @@ void nvmNotStarted() {
 
 /**
  * Writes value to nvm
+ * 
+ * @param writeptr pointer to write function
+ * @param key key of value to write
+ * @param value result storage
  */
-template <typename T> void writeValue(uint16_t address, T value) {
-	bool success = nvmWriteValue(address, value);
+template <typename PTR, typename T> void writeValue(PTR writeptr, uint16_t key, T value) {
+	
+	bool success = writeptr(key, value);
 	if (!success) {
 		printFail(writeFail);
 	}
@@ -79,9 +84,15 @@ template <typename T> void writeValue(uint16_t address, T value) {
 
 /**
  * Gets value from nvm
+ * 
+ * @param getptr pointer to get function
+ * @param key key of value to get
+ * @param value result storage
  */
-template <typename T> void getValue(uint16_t address, T *value) {
-	bool success = nvmGetValue(address, value);
+template <typename PTR, typename T> void getValue(PTR getptr, uint16_t key, T *value) {
+
+	bool success = getptr(key, value, CAN_DEFAULT);
+
 	if (!success) {
 		printFail(getFail);
 	}
@@ -90,18 +101,21 @@ template <typename T> void getValue(uint16_t address, T *value) {
 /**
  * Tests if int writes and reads properly
  * 
+ * @param writeptr pointer to write function
+ * @param getptr pointer to get function
  * @param key key of value to test
  * @param value value to compare operations to
  * @param defaultValue default value from get
  * @param canDefault if get can return default value
  */
-template <typename T>
-void testInt(uint16_t key, T value, T defaultValue, bool canDefault) {
+template <typename WRITEPTR, typename GETPTR, typename T>
+void testInt(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T value, T defaultValue, bool canDefault) {
 
 	T result;
 
-	writeValue(key, value);
-	getValue(key, &result);
+	writeValue(writeptr, key, value);
+	getValue(getptr, key, &result);
+
 	if (value != result) {
 		printFail(unequalFail);
 	}
@@ -113,34 +127,38 @@ void testInt(uint16_t key, T value, T defaultValue, bool canDefault) {
 /**
  * Tests 0 and max value of unsigned int
  * 
+ * @param writeptr pointer to write function
+ * @param getptr pointer to get function
  * @param key key of value to test
  * @param max maximum value of the int
  * @param defaultValue default value from get
  */
-template <typename T>
-void testIntType(uint16_t key, T max, T defaultValue) {
+template <typename WRITEPTR, typename GETPTR, typename T>
+void testIntType(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T max, T defaultValue) {
 
 	nvmNotStarted();
 
-	testInt(key, max, defaultValue, CAN_DEFAULT);
-	testInt(key, max, defaultValue, CAN_NOT_DEFAULT);
-	testInt(key, (T)0, defaultValue, CAN_DEFAULT);
+	testInt(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT);
+	testInt(writeptr, getptr, key, max, defaultValue, CAN_NOT_DEFAULT);
+	testInt(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT);
 }
 
 /**
  * Tests 0, min value, and max value of signed int
  * 
+ * @param writeptr pointer to write function
+ * @param getptr pointer to get function
  * @param key key of value to test
  * @param min minimum value of the int
  * @param max maximum value of the int
  * @param defaultValue default value from get
  */
-template <typename T>
-void testIntType(uint16_t key, T min, T max, T defaultValue) {
+template <typename WRITEPTR, typename GETPTR, typename T>
+void testIntType(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T min, T max, T defaultValue) {
 
-	testIntType(key, max, defaultValue);
-	testInt(key, min, defaultValue, CAN_DEFAULT);
-	testInt(key, min, defaultValue, CAN_NOT_DEFAULT);
+	testIntType(writeptr, getptr, key, max, defaultValue);
+	testInt(writeptr, getptr, key, min, defaultValue, CAN_DEFAULT);
+	testInt(writeptr, getptr, key, min, defaultValue, CAN_NOT_DEFAULT);
 }
 
 void testNVMInit() {
@@ -172,11 +190,11 @@ void testNVMInit() {
 	}
 
 	// tests getting/writing value prematurely
-	valid = nvmGetValue(U8_KEY, &result);
+	valid = nvmGetUI8(U8_KEY, &result, CAN_DEFAULT);
 	if (valid) {
 		printFail(notInitFail);
 	}
-	valid = nvmWriteValue(U8_KEY, (uint8_t)0);
+	valid = nvmWriteUI8(U8_KEY, (uint8_t)0);
 	if (valid) {
 		printFail(notInitFail);
 	}
@@ -229,47 +247,47 @@ void testNVMInit() {
 }
 
 void testNVMBool() {
-	testIntType(BOOL_KEY, true, DEFAULT_BOOL);
+	testIntType(&nvmWriteBool, &nvmGetBool, BOOL_KEY, true, DEFAULT_BOOL);
 }
 
 void testNVMi8() {
-	testIntType(I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX, (int8_t)DEFAULT_INT);
+	testIntType(&nvmWriteI8, &nvmGetI8, I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX, (int8_t)DEFAULT_INT);
 }
 
 void testNVMu8() {
-	testIntType(U8_KEY, (uint8_t)UINT8_MAX, (uint8_t)DEFAULT_INT);
+	testIntType(&nvmWriteUI8, &nvmGetUI8, U8_KEY, (uint8_t)UINT8_MAX, (uint8_t)DEFAULT_INT);
 }
 
 void testNVMi16() {
-	testIntType(I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX, (int16_t)DEFAULT_INT);
+	testIntType(&nvmWriteI16, &nvmGetI16, I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX, (int16_t)DEFAULT_INT);
 }
 
 void testNVMu16() {
-	testIntType(U16_KEY, (uint16_t)UINT16_MAX, (uint16_t)DEFAULT_INT);
+	testIntType(&nvmWriteUI16, &nvmGetUI16, U16_KEY, (uint16_t)UINT16_MAX, (uint16_t)DEFAULT_INT);
 }
 
 void testNVMi32() {
-	testIntType(I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX, (int32_t)DEFAULT_INT);
+	testIntType(&nvmWriteI32, &nvmGetI32, I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX, (int32_t)DEFAULT_INT);
 }
 
 void testNVMu32() {
-	testIntType(U32_KEY, (uint32_t)UINT32_MAX, (uint32_t)DEFAULT_INT);
+	testIntType(&nvmWriteUI32, &nvmGetUI32, U32_KEY, (uint32_t)UINT32_MAX, (uint32_t)DEFAULT_INT);
 }
 
 void testNVMi64() {
-	testIntType(I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX, (int64_t)DEFAULT_INT);
+	testIntType(&nvmWriteI64, &nvmGetI64, I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX, (int64_t)DEFAULT_INT);
 }
 
 void testNVMu64() {
-	testIntType(U64_KEY, (uint64_t)UINT64_MAX, (uint64_t)DEFAULT_INT);
+	testIntType(&nvmWriteUI64, &nvmGetUI64, U64_KEY, (uint64_t)UINT64_MAX, (uint64_t)DEFAULT_INT);
 }
 
 void testNVMFloat() {
-	testIntType(FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT);
+	testIntType(&nvmWriteFloat, &nvmGetFloat, FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT);
 }
 
 void testNVMDouble() {
-	testIntType(DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT);
+	testIntType(&nvmWriteDouble, &nvmGetDouble, DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT);
 }
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
@@ -292,22 +310,22 @@ void testNVMCharArray() {
 	char *emptyVal = (char*)"";
 	bool valid;
 
-	valid = nvmWriteValue(CHAR_ARRAY_KEY, nullPtr, 1);
+	valid = nvmWriteCharArray(CHAR_ARRAY_KEY, nullPtr, 1);
 	if (valid) {
 		printFail(noNullFail);
 	}
 
-	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, 0);
+	valid = nvmWriteCharArray(CHAR_ARRAY_KEY, testVal, 0);
 	if (valid) {
 		printFail(size0Fail);
 	}
 
-	valid = nvmWriteValue(CHAR_ARRAY_KEY, emptyVal, 1);
+	valid = nvmWriteCharArray(CHAR_ARRAY_KEY, emptyVal, 1);
 	if (!valid) {
 		printFail(acceptEmptyFail);
 	}
 
-	valid = nvmGetValue(CHAR_ARRAY_KEY, smallOutput, 1);
+	valid = nvmGetCharArray(CHAR_ARRAY_KEY, smallOutput, 1);
 	if (!valid) {
 		printFail(acceptEmptyFail);
 	}
@@ -316,32 +334,32 @@ void testNVMCharArray() {
 		printFail(unequalFail);
 	}
 
-	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, 2);
+	valid = nvmWriteCharArray(CHAR_ARRAY_KEY, testVal, 2);
 	if (valid) {
 		printFail(badSizeFail);
 	}
 
-	valid = nvmWriteValue(CHAR_ARRAY_KEY, testVal, charSize);
+	valid = nvmWriteCharArray(CHAR_ARRAY_KEY, testVal, charSize);
 	if (!valid) {
 		TEST_FAIL();
 	}
 
-	valid = nvmGetValue(CHAR_ARRAY_KEY, nullPtr, 0);
+	valid = nvmGetCharArray(CHAR_ARRAY_KEY, nullPtr, 0);
 	if (valid) {
 		printFail(noNullFail);
 	}
 
-	valid = nvmGetValue(CHAR_ARRAY_KEY, smallOutput, 0);
+	valid = nvmGetCharArray(CHAR_ARRAY_KEY, smallOutput, 0);
 	if (valid) {
 		printFail(size0Fail);
 	}
 
-	valid = nvmGetValue(CHAR_ARRAY_KEY, output, 2);
+	valid = nvmGetCharArray(CHAR_ARRAY_KEY, output, 2);
 	if (valid) {
 		printFail(badSizeFail);
 	}
 
-	valid = nvmGetValue(CHAR_ARRAY_KEY, output, charSize);
+	valid = nvmGetCharArray(CHAR_ARRAY_KEY, output, charSize);
 	if (!valid) {
 		TEST_FAIL();
 	}

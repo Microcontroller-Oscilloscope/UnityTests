@@ -81,7 +81,7 @@
 
 #if NUM_TIMERS > 0
 
-#include <hardTimer.h>
+#include <hard_timer.h>
 
 /****************************
  * Slow Timer Defines
