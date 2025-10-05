@@ -1,5 +1,5 @@
 /*
-	nvm.cpp - methods to test nvm methods
+	nvm_tests.c - methods to test nvm methods
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -29,8 +29,8 @@ memCharString writeFail[] = {WRITE_FAIL_STR};
 
 // nvm init error strings
 memCharString badSizeFail[] = {BAD_SIZE_FAIL_STR};
-memCharString initFail[] = {INIT_FAIL_STR};
-memCharString initTestedIgnore[] = {INIT_TESTED_IGNORE_STR};
+memCharString nvmInitFail[] = {INIT_FAIL_STR};
+memCharString initTestedIgnore[] = {"NVM tested"};
 memCharString notInitFail[] = {NOT_INIT_FAIL_STR};
 memCharString nvmStartedFail[] = {NVM_STARTED_FAIL_STR};
 memCharString size0Fail[] = {SIZE_0_FAIL_STR};
@@ -70,37 +70,6 @@ void nvmNotStarted(void) {
 }
 
 /**
- * Writes value to nvm
- * 
- * @param writeptr pointer to write function
- * @param key key of value to write
- * @param value result storage
- */
-template <typename PTR, typename T> void writeValue(PTR writeptr, uint16_t key, T value) {
-	
-	bool success = writeptr(key, value);
-	if (!success) {
-		printFail(writeFail);
-	}
-}
-
-/**
- * Gets value from nvm
- * 
- * @param getptr pointer to get function
- * @param key key of value to get
- * @param value result storage
- */
-template <typename PTR, typename T> void getValue(PTR getptr, uint16_t key, T *value) {
-
-	bool success = getptr(key, value, CAN_DEFAULT);
-
-	if (!success) {
-		printFail(getFail);
-	}
-}
-
-/**
  * Tests if int writes and reads properly
  * 
  * @param writeptr pointer to write function
@@ -109,22 +78,21 @@ template <typename PTR, typename T> void getValue(PTR getptr, uint16_t key, T *v
  * @param value value to compare operations to
  * @param defaultValue default value from get
  * @param canDefault if get can return default value
+ * @param T variable type literal
  */
-template <typename WRITEPTR, typename GETPTR, typename T>
-void testInt(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T value, T defaultValue, bool canDefault) {
-
-	T result;
-
-	writeValue(writeptr, key, value);
-	getValue(getptr, key, &result);
-
-	if (value != result) {
-		printFail(unequalFail);
+#define TEST_INT(writeptr, getptr, key, value, defaultValue, canDefault, T) \
+	if (!writeptr(key, value)) { \
+		printFail(writeFail); \
+	} \
+	if (!getptr(key, &result, CAN_DEFAULT)) { \
+		printFail(getFail); \
+	} \
+	if (value != result) { \
+		printFail(unequalFail); \
+	} \
+	if (!canDefault && value == defaultValue) { \
+		printFail(defaultedFail); \
 	}
-	if (!canDefault && value == defaultValue) {
-		printFail(defaultedFail);
-	}
-}
 
 /**
  * Tests 0 and max value of unsigned int
@@ -134,16 +102,14 @@ void testInt(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T value, T defaultV
  * @param key key of value to test
  * @param max maximum value of the int
  * @param defaultValue default value from get
+ * @param T variable type literal
  */
-template <typename WRITEPTR, typename GETPTR, typename T>
-void testIntType(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T max, T defaultValue) {
-
-	nvmNotStarted();
-
-	testInt(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT);
-	testInt(writeptr, getptr, key, max, defaultValue, CAN_NOT_DEFAULT);
-	testInt(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT);
-}
+#define TEST_UINT_TYPE(writeptr, getptr, key, max, defaultValue, T) \
+	nvmNotStarted(); \
+	T result; \
+	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_NOT_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT, T);
 
 /**
  * Tests 0, min value, and max value of signed int
@@ -154,20 +120,22 @@ void testIntType(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T max, T defaul
  * @param min minimum value of the int
  * @param max maximum value of the int
  * @param defaultValue default value from get
+ * @param T variable type literal
  */
-template <typename WRITEPTR, typename GETPTR, typename T>
-void testIntType(WRITEPTR writeptr, GETPTR getptr, uint16_t key, T min, T max, T defaultValue) {
-
-	testIntType(writeptr, getptr, key, max, defaultValue);
-	testInt(writeptr, getptr, key, min, defaultValue, CAN_DEFAULT);
-	testInt(writeptr, getptr, key, min, defaultValue, CAN_NOT_DEFAULT);
-}
+#define TEST_INT_TYPE(writeptr, getptr, key, min, max, defaultValue, T) \
+	nvmNotStarted(); \
+	T result; \
+	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_NOT_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, min, defaultValue, CAN_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, min, defaultValue, CAN_NOT_DEFAULT, T);
 
 void testNVMInit() {
 
 	uint8_t result;
 	enum NVMStartCode startCode;
-	NVMDefaultCode defaultCode;
+	enum NVMDefaultCode defaultCode;
 	bool valid;
 
 	/**
@@ -207,7 +175,7 @@ void testNVMInit() {
 		printFail(nvmStartedFail);
 	}
 	else if (startCode == NVM_FAILED) {
-		printFail(initFail);
+		printFail(nvmInitFail);
 	}
 	else if (startCode == NVM_INVALID_SIZE) {
 		printFail(badSizeFail);
@@ -250,48 +218,48 @@ void testNVMInit() {
 	}
 }
 
-extern "C" void testNVMBool() {
-	testIntType(&nvmWriteBool, &nvmGetBool, BOOL_KEY, true, DEFAULT_BOOL);
+void testNVMBool() {
+	TEST_UINT_TYPE(nvmWriteBool, nvmGetBool, BOOL_KEY, true, DEFAULT_BOOL, bool);
 }
 
-extern "C" void testNVMi8() {
-	testIntType(&nvmWriteI8, &nvmGetI8, I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX, (int8_t)DEFAULT_INT);
+void testNVMi8() {
+	TEST_INT_TYPE(nvmWriteI8, nvmGetI8, I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX, (int8_t)DEFAULT_INT, int8_t);
 }
 
-extern "C" void testNVMu8() {
-	testIntType(&nvmWriteUI8, &nvmGetUI8, U8_KEY, (uint8_t)UINT8_MAX, (uint8_t)DEFAULT_INT);
+void testNVMu8() {
+	TEST_UINT_TYPE(nvmWriteUI8, nvmGetUI8, U8_KEY, (uint8_t)UINT8_MAX, (uint8_t)DEFAULT_INT, uint8_t);
 }
 
-extern "C" void testNVMi16() {
-	testIntType(&nvmWriteI16, &nvmGetI16, I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX, (int16_t)DEFAULT_INT);
+void testNVMi16() {
+	TEST_INT_TYPE(nvmWriteI16, nvmGetI16, I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX, (int16_t)DEFAULT_INT, int16_t);
 }
 
-extern "C" void testNVMu16() {
-	testIntType(&nvmWriteUI16, &nvmGetUI16, U16_KEY, (uint16_t)UINT16_MAX, (uint16_t)DEFAULT_INT);
+void testNVMu16() {
+	TEST_UINT_TYPE(nvmWriteUI16, nvmGetUI16, U16_KEY, (uint16_t)UINT16_MAX, (uint16_t)DEFAULT_INT, uint16_t);
 }
 
-extern "C" void testNVMi32() {
-	testIntType(&nvmWriteI32, &nvmGetI32, I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX, (int32_t)DEFAULT_INT);
+void testNVMi32() {
+	TEST_INT_TYPE(nvmWriteI32, nvmGetI32, I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX, (int32_t)DEFAULT_INT, int32_t);
 }
 
-extern "C" void testNVMu32() {
-	testIntType(&nvmWriteUI32, &nvmGetUI32, U32_KEY, (uint32_t)UINT32_MAX, (uint32_t)DEFAULT_INT);
+void testNVMu32() {
+	TEST_UINT_TYPE(nvmWriteUI32, nvmGetUI32, U32_KEY, (uint32_t)UINT32_MAX, (uint32_t)DEFAULT_INT, uint32_t);
 }
 
-extern "C" void testNVMi64() {
-	testIntType(&nvmWriteI64, &nvmGetI64, I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX, (int64_t)DEFAULT_INT);
+void testNVMi64() {
+	TEST_INT_TYPE(nvmWriteI64, nvmGetI64, I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX, (int64_t)DEFAULT_INT, int64_t);
 }
 
-extern "C" void testNVMu64() {
-	testIntType(&nvmWriteUI64, &nvmGetUI64, U64_KEY, (uint64_t)UINT64_MAX, (uint64_t)DEFAULT_INT);
+void testNVMu64() {
+	TEST_UINT_TYPE(nvmWriteUI64, nvmGetUI64, U64_KEY, (uint64_t)UINT64_MAX, (uint64_t)DEFAULT_INT, uint64_t);
 }
 
-extern "C" void testNVMFloat() {
-	testIntType(&nvmWriteFloat, &nvmGetFloat, FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT);
+void testNVMFloat() {
+	TEST_INT_TYPE(nvmWriteFloat, nvmGetFloat, FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT, float);
 }
 
-extern "C" void testNVMDouble() {
-	testIntType(&nvmWriteDouble, &nvmGetDouble, DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT);
+void testNVMDouble() {
+	TEST_INT_TYPE(nvmWriteDouble, nvmGetDouble, DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT, double);
 }
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
@@ -301,7 +269,7 @@ static_assert(CHAR_ARRAY_MAX_SIZE > 0, "CHAR_ARRAY_MAX_SIZE needs to be greater 
 static_assert(sizeof(TEST_STRING) <= CHAR_ARRAY_MAX_SIZE, "Test string too large or \
 		CHAR_ARRAY_MAX_SIZE too small");
 
-extern "C" void testNVMCharArray() {
+void testNVMCharArray() {
 
 	nvmNotStarted();
 
@@ -375,7 +343,7 @@ extern "C" void testNVMCharArray() {
 
 #endif
 
-extern "C" void testNVM() {
+void testNVM() {
 	RUN_TEST(&testNVMInit);
 	RUN_TEST(&testNVMInit);
 	RUN_TEST(&testNVMBool);

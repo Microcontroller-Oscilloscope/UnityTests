@@ -81,6 +81,7 @@
 
 #if NUM_TIMERS > 0
 
+#include <compile_flags/compile_flags.h>
 #include <hard_timer.h>
 #include <board_common.h>
 

@@ -18,6 +18,18 @@
 
 #include "test_cases.h"
 
+#if !defined(NO_PROGMEM_COPY_SUPPORT)// || defined(NO_PROGMEM_COPY_SUPPORT)
+
+void printIgnore(memCharString *message) {
+	TEST_IGNORE_MESSAGE(message);
+}
+
+void printFail(memCharString *message) {
+	TEST_FAIL_MESSAGE(message);
+}
+
+#else
+
 /**
  * Copies flash message to memory
  * 
@@ -46,3 +58,5 @@ void printFail(memCharString *message) {
 	copyMessage(message, buffer, messageSize);
 	TEST_FAIL_MESSAGE(buffer);
 }
+
+#endif

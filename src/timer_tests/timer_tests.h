@@ -19,8 +19,6 @@
 #ifndef TIMER_TESTS_H
 #define TIMER_TESTS_H
 
-#include <compile_flags/compile_flags.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif
