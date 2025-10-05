@@ -1,5 +1,5 @@
 /*
-	test_cases.cpp - methodology to test features
+	test_cases.c - methodology to test features
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -33,14 +33,14 @@ void copyMessage(memCharString *message, char *buffer, uint8_t messageSize) {
 	}
 }
 
-extern "C" void printIgnore(memCharString *message) {
+void printIgnore(memCharString *message) {
 	uint8_t messageSize = strlen_P(message) + 1;
 	char buffer[messageSize];
 	copyMessage(message, buffer, messageSize);
 	TEST_IGNORE_MESSAGE(buffer);
 }
 
-extern "C" void printFail(memCharString *message) {
+void printFail(memCharString *message) {
 	uint8_t messageSize = strlen_P(message) + 1;
 	char buffer[messageSize];
 	copyMessage(message, buffer, messageSize);

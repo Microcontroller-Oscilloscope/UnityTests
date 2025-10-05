@@ -1,5 +1,5 @@
 /*
-	full_test.cpp - tests all functionality
+	full_test.c - tests all functionality
 	Copyright (C) 2025 Camren Chraplak
 
 	This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 #include "full_test.h"
 
-extern "C" void fullTest(void) {
+void fullTest(void) {
 	testNVM();
 	testTimers();
 }
