@@ -34,6 +34,8 @@ memCharString initTestedIgnore[] = {INIT_TESTED_IGNORE_STR};
 memCharString notInitFail[] = {NOT_INIT_FAIL_STR};
 memCharString nvmStartedFail[] = {NVM_STARTED_FAIL_STR};
 memCharString size0Fail[] = {SIZE_0_FAIL_STR};
+memCharString initStopFail[] = {"stop"};
+memCharString initInitFail[] = {"init"};
 
 // nvm set default error strings
 memCharString defaultClearFail[] = {DEFAULT_CLEAR_FAIL_STR};
@@ -239,10 +241,12 @@ void testNVMInit() {
 		printFail(defaultWriteFail);
 	}
 	else if (defaultCode == NVM_DEFAULT_FAIL_STOP) {
-		printFail("stop");
+		printFail(initStopFail);
+
 	}
 	else if (defaultCode == NVM_DEFAULT_FAIL_INIT) {
-		printFail("init");
+		printFail(initInitFail);
+
 	}
 }
 

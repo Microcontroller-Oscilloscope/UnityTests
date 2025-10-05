@@ -27,7 +27,7 @@
  */
 void copyMessage(memCharString *message, char *buffer, uint8_t messageSize) {
 	char charByte;
-	for (byte i = 0; i < messageSize; i++) {
+	for (uint8_t i = 0; i < messageSize; i++) {
 		charByte = pgm_read_byte_near(message + i);
 		buffer[i] = charByte;
 	}
