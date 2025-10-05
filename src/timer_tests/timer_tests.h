@@ -21,9 +21,17 @@
 
 #include <compile_flags/compile_flags.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * Tests all timer tests at once
  */
 void testTimers();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

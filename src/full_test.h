@@ -20,13 +20,20 @@
 #define FULL_TEST_H
 
 #include "test_cases.h"
-#include <Arduino.h>
 #include <unity.h>
 
 #include "nvm_tests/nvm_tests.h"
 #include "timer_tests/timer_tests.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 void fullTest(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 /****************************
  * NVM Size Config

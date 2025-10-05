@@ -82,6 +82,7 @@
 #if NUM_TIMERS > 0
 
 #include <hard_timer.h>
+#include <board_common.h>
 
 /****************************
  * Slow Timer Defines
@@ -504,7 +505,7 @@ void testTiming() {
 		printFail(startFail);
 	}
 
-	delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
 	if (!DECONSTRUCT_TIMER()) {
 		printFail(deconstructFail);
 	}
@@ -527,7 +528,7 @@ void testFastTiming() {
 		printFail(startFail);
 	}
 
-	delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
 	if (!DECONSTRUCT_FAST_TIMER()) {
 		printFail(deconstructFail);
 	}
@@ -535,7 +536,7 @@ void testFastTiming() {
 	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_FAST_TEST_COUNT_BUFFER, HARD_TIMER_FAST_TEST_COUNT_TARGET, hardTimerCount);
 }
 
-void testTimers() {
+extern "C" void testTimers() {
 	RUN_TEST(&testProgramStart);
 	RUN_TEST(&testRepeatInit);
 	RUN_TEST(&testRepeatStart);
@@ -554,7 +555,7 @@ void passTimers() {
 	printIgnore(passIgnore);
 }
 
-void testTimers() {
+extern "C" void testTimers() {
 	RUN_TEST(&passTimers);
 }
 #endif

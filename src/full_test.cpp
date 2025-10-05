@@ -18,7 +18,7 @@
 
 #include "full_test.h"
 
-void fullTest(void) {
+extern "C" void fullTest(void) {
 	testNVM();
 	testTimers();
 }

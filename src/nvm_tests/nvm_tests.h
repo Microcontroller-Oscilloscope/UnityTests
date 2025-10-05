@@ -21,7 +21,6 @@
 
 #include <compile_flags/compile_flags.h>
 #include "../test_cases.h"
-#include <Arduino.h>
 #include <unity.h>
 #include <nvm/nvm.h>
 #include <nvm/eeprom_addresses.h>
@@ -73,6 +72,10 @@
 #define DEFAULT_MAX_SIZE_UNKNOWN_FAIL_STR "nvmMaxSize?"
 #define DEFAULT_SIZE_TOO_BIG_FAIL_STR "NVM_SIZE too big"
 #define DEFAULT_WRITE_FAIL_STR "Default write"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Tests if NVM can be initialized properly
@@ -145,5 +148,9 @@ void testNVMCharArray();
  * Tests all nvm tests at once
  */
 void testNVM();
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

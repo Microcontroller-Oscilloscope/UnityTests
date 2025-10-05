@@ -250,47 +250,47 @@ void testNVMInit() {
 	}
 }
 
-void testNVMBool() {
+extern "C" void testNVMBool() {
 	testIntType(&nvmWriteBool, &nvmGetBool, BOOL_KEY, true, DEFAULT_BOOL);
 }
 
-void testNVMi8() {
+extern "C" void testNVMi8() {
 	testIntType(&nvmWriteI8, &nvmGetI8, I8_KEY, (int8_t)INT8_MIN, (int8_t)INT8_MAX, (int8_t)DEFAULT_INT);
 }
 
-void testNVMu8() {
+extern "C" void testNVMu8() {
 	testIntType(&nvmWriteUI8, &nvmGetUI8, U8_KEY, (uint8_t)UINT8_MAX, (uint8_t)DEFAULT_INT);
 }
 
-void testNVMi16() {
+extern "C" void testNVMi16() {
 	testIntType(&nvmWriteI16, &nvmGetI16, I16_KEY, (int16_t)INT16_MIN, (int16_t)INT16_MAX, (int16_t)DEFAULT_INT);
 }
 
-void testNVMu16() {
+extern "C" void testNVMu16() {
 	testIntType(&nvmWriteUI16, &nvmGetUI16, U16_KEY, (uint16_t)UINT16_MAX, (uint16_t)DEFAULT_INT);
 }
 
-void testNVMi32() {
+extern "C" void testNVMi32() {
 	testIntType(&nvmWriteI32, &nvmGetI32, I32_KEY, (int32_t)INT32_MIN, (int32_t)INT32_MAX, (int32_t)DEFAULT_INT);
 }
 
-void testNVMu32() {
+extern "C" void testNVMu32() {
 	testIntType(&nvmWriteUI32, &nvmGetUI32, U32_KEY, (uint32_t)UINT32_MAX, (uint32_t)DEFAULT_INT);
 }
 
-void testNVMi64() {
+extern "C" void testNVMi64() {
 	testIntType(&nvmWriteI64, &nvmGetI64, I64_KEY, (int64_t)INT64_MIN, (int64_t)INT64_MAX, (int64_t)DEFAULT_INT);
 }
 
-void testNVMu64() {
+extern "C" void testNVMu64() {
 	testIntType(&nvmWriteUI64, &nvmGetUI64, U64_KEY, (uint64_t)UINT64_MAX, (uint64_t)DEFAULT_INT);
 }
 
-void testNVMFloat() {
+extern "C" void testNVMFloat() {
 	testIntType(&nvmWriteFloat, &nvmGetFloat, FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT);
 }
 
-void testNVMDouble() {
+extern "C" void testNVMDouble() {
 	testIntType(&nvmWriteDouble, &nvmGetDouble, DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT);
 }
 
@@ -301,7 +301,7 @@ static_assert(CHAR_ARRAY_MAX_SIZE > 0, "CHAR_ARRAY_MAX_SIZE needs to be greater 
 static_assert(sizeof(TEST_STRING) <= CHAR_ARRAY_MAX_SIZE, "Test string too large or \
 		CHAR_ARRAY_MAX_SIZE too small");
 
-void testNVMCharArray() {
+extern "C" void testNVMCharArray() {
 
 	nvmNotStarted();
 
@@ -375,7 +375,7 @@ void testNVMCharArray() {
 
 #endif
 
-void testNVM() {
+extern "C" void testNVM() {
 	RUN_TEST(&testNVMInit);
 	RUN_TEST(&testNVMInit);
 	RUN_TEST(&testNVMBool);

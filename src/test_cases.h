@@ -26,14 +26,17 @@
 #define OSC_TEST_MINOR_VERSION 3
 #define OSC_TEST_PATCH_VERSION 0
 
-#include <Arduino.h>
 #include <unity.h>
 
 // delay to allow serial connection to board
 #define SERIAL_DELAY 2000
 
 // data type for progmem char arrays
-typedef const PROGMEM char memCharString;
+//typedef const PROGMEM char memCharString;
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * Writes ignore message
@@ -48,4 +51,9 @@ void printIgnore(memCharString *message);
  * @param message flash message to print
  */
 void printFail(memCharString *message);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

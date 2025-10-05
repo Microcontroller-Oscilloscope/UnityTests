@@ -33,14 +33,14 @@ void copyMessage(memCharString *message, char *buffer, uint8_t messageSize) {
 	}
 }
 
-void printIgnore(memCharString *message) {
+extern "C" void printIgnore(memCharString *message) {
 	uint8_t messageSize = strlen_P(message) + 1;
 	char buffer[messageSize];
 	copyMessage(message, buffer, messageSize);
 	TEST_IGNORE_MESSAGE(buffer);
 }
 
-void printFail(memCharString *message) {
+extern "C" void printFail(memCharString *message) {
 	uint8_t messageSize = strlen_P(message) + 1;
 	char buffer[messageSize];
 	copyMessage(message, buffer, messageSize);
