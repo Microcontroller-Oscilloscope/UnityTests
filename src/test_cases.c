@@ -18,7 +18,7 @@
 
 #include "test_cases.h"
 
-#if !defined(NO_PROGMEM_COPY_SUPPORT)// || defined(NO_PROGMEM_COPY_SUPPORT)
+#ifdef EMPTY_PROG_FLASH
 
 void printIgnore(memCharString *message) {
 	TEST_IGNORE_MESSAGE(message);

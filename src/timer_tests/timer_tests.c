@@ -164,69 +164,69 @@
  */
 #define DECONSTRUCT_FAST_TIMER() deconstructHardTimer(HARD_TIMER_FAST_TEST)
 
-memCharString invalidInitFail[] = {"Init State"};
-memCharString invalidStartFail[] = {"Start State"};
-memCharString initFail[] = {"Init"};
-memCharString reinitFail[] = {"Reinit"};
-memCharString startFail[] = {"Start"};
-memCharString restartFail[] = {"Restart"};
-memCharString cancelFail[] = {"Stop"};
-memCharString recancelFail[] = {"Restop"};
-memCharString deconstructFail[] = {"Decon"};
-memCharString redeconstructFail[] = {"Redecon"};
+memCharString invalidInitFail[] PROG_FLASH = {"Init State"};
+memCharString invalidStartFail[] PROG_FLASH = {"Start State"};
+memCharString initFail[] PROG_FLASH = {"Init"};
+memCharString reinitFail[] PROG_FLASH = {"Reinit"};
+memCharString startFail[] PROG_FLASH = {"Start"};
+memCharString restartFail[] PROG_FLASH = {"Restart"};
+memCharString cancelFail[] PROG_FLASH = {"Stop"};
+memCharString recancelFail[] PROG_FLASH = {"Restop"};
+memCharString deconstructFail[] PROG_FLASH = {"Decon"};
+memCharString redeconstructFail[] PROG_FLASH = {"Redecon"};
 
 
-memCharString path00toIFail[] = {"00>I"};
-memCharString paths00toIFail[] = {"S00>I"};
-memCharString pathi00toIFail[] = {"I00>I"};
+memCharString path00toIFail[] PROG_FLASH = {"00>I"};
+memCharString paths00toIFail[] PROG_FLASH = {"S00>I"};
+memCharString pathi00toIFail[] PROG_FLASH = {"I00>I"};
 
-memCharString path00toDFail[] = {"00>D"};
-memCharString paths00toDFail[] = {"S00>D"};
-memCharString pathi00toDFail[] = {"I00>D"};
+memCharString path00toDFail[] PROG_FLASH = {"00>D"};
+memCharString paths00toDFail[] PROG_FLASH = {"S00>D"};
+memCharString pathi00toDFail[] PROG_FLASH = {"I00>D"};
 
-memCharString path00toCFail[] = {"00>C"};
-memCharString paths00toCFail[] = {"S00>C"};
-memCharString pathi00toCFail[] = {"I00>C"};
+memCharString path00toCFail[] PROG_FLASH = {"00>C"};
+memCharString paths00toCFail[] PROG_FLASH = {"S00>C"};
+memCharString pathi00toCFail[] PROG_FLASH = {"I00>C"};
 
-memCharString path00toSFail[] = {"00>S"};
-memCharString paths00toSFail[] = {"S00>S"};
-memCharString pathi00toSFail[] = {"I00>S"};
-
-
-
-memCharString path01toIFail[] = {"01>I"};
-memCharString paths01toIFail[] = {"S01>I"};
-memCharString pathi01toIFail[] = {"I01>I"};
-
-memCharString path01toDFail[] = {"01>D"};
-memCharString paths01toDFail[] = {"S01>D"};
-memCharString pathi01toDFail[] = {"I01>D"};
-
-memCharString path01toCFail[] = {"01>C"};
-memCharString paths01toCFail[] = {"S01>C"};
-memCharString pathi01toCFail[] = {"I01>C"};
-
-memCharString path01toSFail[] = {"01>S"};
-memCharString paths01toSFail[] = {"S01>S"};
-memCharString pathi01toSFail[] = {"I01>S"};
+memCharString path00toSFail[] PROG_FLASH = {"00>S"};
+memCharString paths00toSFail[] PROG_FLASH = {"S00>S"};
+memCharString pathi00toSFail[] PROG_FLASH = {"I00>S"};
 
 
 
-memCharString path11toIFail[] = {"11>I"};
-memCharString paths11toIFail[] = {"S11>I"};
-memCharString pathi11toIFail[] = {"I11>I"};
+memCharString path01toIFail[] PROG_FLASH = {"01>I"};
+memCharString paths01toIFail[] PROG_FLASH = {"S01>I"};
+memCharString pathi01toIFail[] PROG_FLASH = {"I01>I"};
 
-memCharString path11toDFail[] = {"11>D"};
-memCharString paths11toDFail[] = {"S11>D"};
-memCharString pathi11toDFail[] = {"I11>D"};
+memCharString path01toDFail[] PROG_FLASH = {"01>D"};
+memCharString paths01toDFail[] PROG_FLASH = {"S01>D"};
+memCharString pathi01toDFail[] PROG_FLASH = {"I01>D"};
 
-memCharString path11toCFail[] = {"11>C"};
-memCharString paths11toCFail[] = {"S11>C"};
-memCharString pathi11toCFail[] = {"I11>C"};
+memCharString path01toCFail[] PROG_FLASH = {"01>C"};
+memCharString paths01toCFail[] PROG_FLASH = {"S01>C"};
+memCharString pathi01toCFail[] PROG_FLASH = {"I01>C"};
 
-memCharString path11toSFail[] = {"11>S"};
-memCharString paths11toSFail[] = {"S11>S"};
-memCharString pathi11toSFail[] = {"I11>S"};
+memCharString path01toSFail[] PROG_FLASH = {"01>S"};
+memCharString paths01toSFail[] PROG_FLASH = {"S01>S"};
+memCharString pathi01toSFail[] PROG_FLASH = {"I01>S"};
+
+
+
+memCharString path11toIFail[] PROG_FLASH = {"11>I"};
+memCharString paths11toIFail[] PROG_FLASH = {"S11>I"};
+memCharString pathi11toIFail[] PROG_FLASH = {"I11>I"};
+
+memCharString path11toDFail[] PROG_FLASH = {"11>D"};
+memCharString paths11toDFail[] PROG_FLASH = {"S11>D"};
+memCharString pathi11toDFail[] PROG_FLASH = {"I11>D"};
+
+memCharString path11toCFail[] PROG_FLASH = {"11>C"};
+memCharString paths11toCFail[] PROG_FLASH = {"S11>C"};
+memCharString pathi11toCFail[] PROG_FLASH = {"I11>C"};
+
+memCharString path11toSFail[] PROG_FLASH = {"11>S"};
+memCharString paths11toSFail[] PROG_FLASH = {"S11>S"};
+memCharString pathi11toSFail[] PROG_FLASH = {"I11>S"};
 
 volatile uint32_t hardTimerCount = 0U;
 
@@ -550,7 +550,7 @@ void testTimers() {
 
 #else
 
-memCharString passIgnore[] = {"Ignoring timer tests"};
+memCharString passIgnore[] PROG_FLASH = {"Ignoring timer tests"};
 
 void passTimers() {
 	printIgnore(passIgnore);

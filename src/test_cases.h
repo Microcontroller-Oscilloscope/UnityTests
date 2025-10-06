@@ -31,9 +31,6 @@
 // delay to allow serial connection to board
 #define SERIAL_DELAY 2000
 
-// data type for progmem char arrays
-//typedef const PROGMEM char memCharString;
-
 #ifdef __cplusplus
 extern "C" {
 #endif

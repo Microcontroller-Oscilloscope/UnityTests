@@ -19,30 +19,30 @@
 #include "nvm_tests.h"
 
 // nvm operations error strings
-memCharString acceptEmptyFail[] = {ACCEPT_EMPTY_FAIL_STR};
-memCharString callInitFail[] = {CALL_INIT_FAIL_STR};
-memCharString defaultedFail[] = {DEFAULTED_FAIL_STR};
-memCharString getFail[] = {GET_FAIL_STR};
-memCharString noNullFail[] = {NO_NULL_FAIL_STR};
-memCharString unequalFail[] = {UNEQUAL_FAIL_STR};
-memCharString writeFail[] = {WRITE_FAIL_STR};
+memCharString acceptEmptyFail[] PROG_FLASH = {ACCEPT_EMPTY_FAIL_STR};
+memCharString callInitFail[] PROG_FLASH = {CALL_INIT_FAIL_STR};
+memCharString defaultedFail[] PROG_FLASH = {DEFAULTED_FAIL_STR};
+memCharString getFail[] PROG_FLASH = {GET_FAIL_STR};
+memCharString noNullFail[] PROG_FLASH = {NO_NULL_FAIL_STR};
+memCharString unequalFail[] PROG_FLASH = {UNEQUAL_FAIL_STR};
+memCharString writeFail[] PROG_FLASH = {WRITE_FAIL_STR};
 
 // nvm init error strings
-memCharString badSizeFail[] = {BAD_SIZE_FAIL_STR};
-memCharString nvmInitFail[] = {INIT_FAIL_STR};
-memCharString initTestedIgnore[] = {"NVM tested"};
-memCharString notInitFail[] = {NOT_INIT_FAIL_STR};
-memCharString nvmStartedFail[] = {NVM_STARTED_FAIL_STR};
-memCharString size0Fail[] = {SIZE_0_FAIL_STR};
-memCharString initStopFail[] = {"stop"};
-memCharString initInitFail[] = {"init"};
+memCharString badSizeFail[] PROG_FLASH = {BAD_SIZE_FAIL_STR};
+memCharString nvmInitFail[] PROG_FLASH = {INIT_FAIL_STR};
+memCharString initTestedIgnore[] PROG_FLASH = {"NVM tested"};
+memCharString notInitFail[] PROG_FLASH = {NOT_INIT_FAIL_STR};
+memCharString nvmStartedFail[] PROG_FLASH = {NVM_STARTED_FAIL_STR};
+memCharString size0Fail[] PROG_FLASH = {SIZE_0_FAIL_STR};
+memCharString initStopFail[] PROG_FLASH = {"stop"};
+memCharString initInitFail[] PROG_FLASH = {"init"};
 
 // nvm set default error strings
-memCharString defaultClearFail[] = {DEFAULT_CLEAR_FAIL_STR};
-memCharString defaultMaxSizeFail[] = {DEFAULT_MAX_SIZE_FAIL_STR};
-memCharString defaultMaxSizeUnknownFail[] = {DEFAULT_MAX_SIZE_UNKNOWN_FAIL_STR};
-memCharString defaultSizeTooBigFail[] = {DEFAULT_SIZE_TOO_BIG_FAIL_STR};
-memCharString defaultWriteFail[] = {DEFAULT_WRITE_FAIL_STR};
+memCharString defaultClearFail[] PROG_FLASH = {DEFAULT_CLEAR_FAIL_STR};
+memCharString defaultMaxSizeFail[] PROG_FLASH = {DEFAULT_MAX_SIZE_FAIL_STR};
+memCharString defaultMaxSizeUnknownFail[] PROG_FLASH = {DEFAULT_MAX_SIZE_UNKNOWN_FAIL_STR};
+memCharString defaultSizeTooBigFail[] PROG_FLASH = {DEFAULT_SIZE_TOO_BIG_FAIL_STR};
+memCharString defaultWriteFail[] PROG_FLASH = {DEFAULT_WRITE_FAIL_STR};
 
 /**
  * Tests if nvm is started
