@@ -75,6 +75,13 @@
 #define DEFAULT_WRITE_FAIL_STR "Default write"
 
 #ifdef __cplusplus
+// test to verify testing strings are within bounds
+static_assert(CHAR_ARRAY_MAX_SIZE > 0, "CHAR_ARRAY_MAX_SIZE needs to be greater than 0");
+static_assert(sizeof(TEST_STRING) <= CHAR_ARRAY_MAX_SIZE, "Test string too large or \
+		CHAR_ARRAY_MAX_SIZE too small");
+#endif
+
+#ifdef __cplusplus
 extern "C" {
 #endif
 

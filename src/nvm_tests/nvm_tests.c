@@ -18,6 +18,8 @@
 
 #include "nvm_tests.h"
 
+#include <comm/hard_serial/hard_serial.h>
+
 // nvm operations error strings
 memCharString acceptEmptyFail[] PROG_FLASH = {ACCEPT_EMPTY_FAIL_STR};
 memCharString callInitFail[] PROG_FLASH = {CALL_INIT_FAIL_STR};
@@ -210,11 +212,9 @@ void testNVMInit() {
 	}
 	else if (defaultCode == NVM_DEFAULT_FAIL_STOP) {
 		printFail(initStopFail);
-
 	}
 	else if (defaultCode == NVM_DEFAULT_FAIL_INIT) {
 		printFail(initInitFail);
-
 	}
 }
 
@@ -264,10 +264,8 @@ void testNVMDouble() {
 
 #ifndef NO_CHAR_ARRAY_SUPPORT
 
-// test to verify testing strings are within bounds
-static_assert(CHAR_ARRAY_MAX_SIZE > 0, "CHAR_ARRAY_MAX_SIZE needs to be greater than 0");
-static_assert(sizeof(TEST_STRING) <= CHAR_ARRAY_MAX_SIZE, "Test string too large or \
-		CHAR_ARRAY_MAX_SIZE too small");
+memCharString strWriteFail[] PROG_FLASH = {"str write"};
+memCharString strGetFail[] PROG_FLASH = {"str get"};
 
 void testNVMCharArray() {
 
@@ -276,7 +274,7 @@ void testNVMCharArray() {
 	char *testVal = (char*)TEST_STRING;
 	uint8_t charSize = charArraySize(testVal);
 
-	char *nullPtr = nullptr;
+	char *nullPtr = NULL;
 	char smallOutput[1];
 	char output[charSize];
 	char *emptyVal = (char*)"";
@@ -313,7 +311,7 @@ void testNVMCharArray() {
 
 	valid = nvmWriteCharArray(CHAR_ARRAY_KEY, testVal, charSize);
 	if (!valid) {
-		TEST_FAIL();
+		printFail(strWriteFail);
 	}
 
 	valid = nvmGetCharArray(CHAR_ARRAY_KEY, nullPtr, 0);
@@ -333,7 +331,7 @@ void testNVMCharArray() {
 
 	valid = nvmGetCharArray(CHAR_ARRAY_KEY, output, charSize);
 	if (!valid) {
-		TEST_FAIL();
+		printFail(strGetFail);
 	}
 
 	if (!sameString(output, testVal)) {
