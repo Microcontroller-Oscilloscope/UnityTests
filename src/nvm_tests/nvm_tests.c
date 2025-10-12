@@ -21,30 +21,31 @@
 #include <comm/hard_serial/hard_serial.h>
 
 // nvm operations error strings
-memCharString acceptEmptyFail[] PROG_FLASH = {ACCEPT_EMPTY_FAIL_STR};
-memCharString callInitFail[] PROG_FLASH = {CALL_INIT_FAIL_STR};
-memCharString defaultedFail[] PROG_FLASH = {DEFAULTED_FAIL_STR};
-memCharString getFail[] PROG_FLASH = {GET_FAIL_STR};
-memCharString noNullFail[] PROG_FLASH = {NO_NULL_FAIL_STR};
-memCharString unequalFail[] PROG_FLASH = {UNEQUAL_FAIL_STR};
-memCharString writeFail[] PROG_FLASH = {WRITE_FAIL_STR};
+memCharString acceptEmptyFail[] PROG_FLASH = {"Accept empty"};
+memCharString callInitFail[] PROG_FLASH = {"Call testNVMInit"};
+memCharString defaultedFail[] PROG_FLASH = {"Default"};
+memCharString getFail[] PROG_FLASH = {"Get"};
+memCharString noNullFail[] PROG_FLASH = {"No NULL"};
+memCharString unequalFail[] PROG_FLASH = {"Unequal"};
+memCharString writeFail[] PROG_FLASH = {"Write"};
+memCharString getDefaultFail[] PROG_FLASH = {"Must Default"};
 
 // nvm init error strings
-memCharString badSizeFail[] PROG_FLASH = {BAD_SIZE_FAIL_STR};
-memCharString nvmInitFail[] PROG_FLASH = {INIT_FAIL_STR};
+memCharString badSizeFail[] PROG_FLASH = {"Bad size"};
+memCharString nvmInitFail[] PROG_FLASH = {"Init"};
 memCharString initTestedIgnore[] PROG_FLASH = {"NVM tested"};
-memCharString notInitFail[] PROG_FLASH = {NOT_INIT_FAIL_STR};
-memCharString nvmStartedFail[] PROG_FLASH = {NVM_STARTED_FAIL_STR};
-memCharString size0Fail[] PROG_FLASH = {SIZE_0_FAIL_STR};
+memCharString notInitFail[] PROG_FLASH = {"Not init"};
+memCharString nvmStartedFail[] PROG_FLASH = {"NVM started"};
+memCharString size0Fail[] PROG_FLASH = {"Size 0"};
 memCharString initStopFail[] PROG_FLASH = {"stop"};
 memCharString initInitFail[] PROG_FLASH = {"init"};
 
 // nvm set default error strings
-memCharString defaultClearFail[] PROG_FLASH = {DEFAULT_CLEAR_FAIL_STR};
-memCharString defaultMaxSizeFail[] PROG_FLASH = {DEFAULT_MAX_SIZE_FAIL_STR};
-memCharString defaultMaxSizeUnknownFail[] PROG_FLASH = {DEFAULT_MAX_SIZE_UNKNOWN_FAIL_STR};
-memCharString defaultSizeTooBigFail[] PROG_FLASH = {DEFAULT_SIZE_TOO_BIG_FAIL_STR};
-memCharString defaultWriteFail[] PROG_FLASH = {DEFAULT_WRITE_FAIL_STR};
+memCharString defaultClearFail[] PROG_FLASH = {"NVM clear"};
+memCharString defaultMaxSizeFail[] PROG_FLASH = {"nvmMaxSize"};
+memCharString defaultMaxSizeUnknownFail[] PROG_FLASH = {"nvmMaxSize?"};
+memCharString defaultSizeTooBigFail[] PROG_FLASH = {"NVM_SIZE too big"};
+memCharString defaultWriteFail[] PROG_FLASH = {"Default write"};
 
 /**
  * Tests if nvm is started
@@ -97,6 +98,30 @@ void nvmNotStarted(void) {
 	}
 
 /**
+ * Tests if int writes and reads properly with default catching
+ * 
+ * @param writeptr pointer to write function
+ * @param getptr pointer to get function
+ * @param key key of value to test
+ * @param value value to compare operations to
+ * @param defaultValue default value from get
+ * @param T variable type literal
+ */
+#define TEST_DEFAULT_INT(writeptr, getptr, key, value, defaultValue, T) \
+	if (!writeptr(key, value)) { \
+		printFail(writeFail); \
+	} \
+	if (!getptr(key, &result, CAN_DEFAULT)) { \
+		printFail(getFail); \
+	} \
+	if (value != result) { \
+		printFail(unequalFail); \
+	} \
+	if (getptr(key, &result, CAN_NOT_DEFAULT)) { \
+		printFail(getDefaultFail); \
+	} \
+
+/**
  * Tests 0 and max value of unsigned int
  * 
  * @param writeptr pointer to write function
@@ -111,7 +136,8 @@ void nvmNotStarted(void) {
 	T result; \
 	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT, T); \
 	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_NOT_DEFAULT, T); \
-	TEST_INT(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT, T);
+	TEST_INT(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT, T); \
+	TEST_DEFAULT_INT(writeptr, getptr, key, (T)0, defaultValue, T);
 
 /**
  * Tests 0, min value, and max value of signed int
@@ -125,6 +151,27 @@ void nvmNotStarted(void) {
  * @param T variable type literal
  */
 #define TEST_INT_TYPE(writeptr, getptr, key, min, max, defaultValue, T) \
+	nvmNotStarted(); \
+	T result; \
+	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_NOT_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, (T)0, defaultValue, CAN_DEFAULT, T); \
+	TEST_DEFAULT_INT(writeptr, getptr, key, (T)0, defaultValue, T); \
+	TEST_INT(writeptr, getptr, key, min, defaultValue, CAN_DEFAULT, T); \
+	TEST_INT(writeptr, getptr, key, min, defaultValue, CAN_NOT_DEFAULT, T);
+
+/**
+ * Tests 0, min value, and max value of float/double
+ * 
+ * @param writeptr pointer to write function
+ * @param getptr pointer to get function
+ * @param key key of value to test
+ * @param min minimum value of the int
+ * @param max maximum value of the int
+ * @param defaultValue default value from get
+ * @param T variable type literal
+ */
+#define TEST_FLOAT_TYPE(writeptr, getptr, key, min, max, defaultValue, T) \
 	nvmNotStarted(); \
 	T result; \
 	TEST_INT(writeptr, getptr, key, max, defaultValue, CAN_DEFAULT, T); \
@@ -255,11 +302,11 @@ void testNVMu64() {
 }
 
 void testNVMFloat() {
-	TEST_INT_TYPE(nvmWriteFloat, nvmGetFloat, FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT, float);
+	TEST_FLOAT_TYPE(nvmWriteFloat, nvmGetFloat, FLOAT_KEY, (float)__FLT_MIN__, (float)__FLT_MAX__, (float)DEFAULT_FLOAT, float);
 }
 
 void testNVMDouble() {
-	TEST_INT_TYPE(nvmWriteDouble, nvmGetDouble, DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT, double);
+	TEST_FLOAT_TYPE(nvmWriteDouble, nvmGetDouble, DOUBLE_KEY, (double)__DBL_MIN__, (double)__DBL_MAX__, (double)DEFAULT_FLOAT, double);
 }
 
 #ifndef NO_CHAR_ARRAY_SUPPORT

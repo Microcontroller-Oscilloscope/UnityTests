@@ -50,30 +50,6 @@
 
 #define TEST_NVM_END_KEY CHAR_ARRAY_KEY + CHAR_ARRAY_MAX_SIZE
 
-// nvm operations error strings
-#define ACCEPT_EMPTY_FAIL_STR "Accept empty"
-#define CALL_INIT_FAIL_STR "Call testNVMInit"
-#define DEFAULTED_FAIL_STR "Default"
-#define GET_FAIL_STR "Get"
-#define NO_NULL_FAIL_STR "No NULL"
-#define UNEQUAL_FAIL_STR "Unequal"
-#define WRITE_FAIL_STR "Write"
-
-// nvm init error strings
-#define BAD_SIZE_FAIL_STR "Bad size"
-#define INIT_FAIL_STR "Init"
-#define INIT_TESTED_IGNORE_STR "NVM tested"
-#define NOT_INIT_FAIL_STR "Not init"
-#define NVM_STARTED_FAIL_STR "NVM started"
-#define SIZE_0_FAIL_STR "Size 0"
-
-// nvm set default error strings
-#define DEFAULT_CLEAR_FAIL_STR "NVM clear"
-#define DEFAULT_MAX_SIZE_FAIL_STR "nvmMaxSize"
-#define DEFAULT_MAX_SIZE_UNKNOWN_FAIL_STR "nvmMaxSize?"
-#define DEFAULT_SIZE_TOO_BIG_FAIL_STR "NVM_SIZE too big"
-#define DEFAULT_WRITE_FAIL_STR "Default write"
-
 #ifdef __cplusplus
 // test to verify testing strings are within bounds
 static_assert(CHAR_ARRAY_MAX_SIZE > 0, "CHAR_ARRAY_MAX_SIZE needs to be greater than 0");
