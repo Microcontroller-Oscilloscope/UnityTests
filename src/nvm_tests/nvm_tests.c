@@ -93,8 +93,10 @@ void nvmNotStarted(void) {
 	if (value != result) { \
 		printFail(unequalFail); \
 	} \
-	if (!canDefault && value == defaultValue) { \
-		printFail(defaultedFail); \
+	if (!canDefault) { \
+		if (!getptr(key, &result, CAN_NOT_DEFAULT)) { \
+			printFail(defaultedFail); \
+		} \
 	}
 
 /**

@@ -516,9 +516,6 @@ void testTiming() {
 
 void testFastTiming() {
 
-	// ensure slow timing works first
-	testTiming();
-
 	testGetState(HARD_TIMER_FAST_TEST, false, false);
 	hardTimerCount = 0U;
 
