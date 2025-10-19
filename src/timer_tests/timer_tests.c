@@ -16,66 +16,6 @@
 	along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-/**
- * All timer paths
- * 
- * base: configuration when timer hasn't been touched since startup
- * init: initHardTimer function
- * deconstruct: deconstructHardTimer function
- * cancel: cancelHardTimer function
- * set: setHardTimer function
- * 
- * Valid paths:
- * 
- * base/deconstruct -> init
- * init/cancel -> deconstruct
- * init/cancel -> set
- * set -> cancel
- * set -> deconstruct
- * 
- * Invalid paths:
- * 
- * base/deconstruct -> deconstruct
- * base/deconstruct -> cancel
- * base/deconstruct -> set
- * 
- * init/cancel -> init
- * init/cancel -> cancel
- * 
- * set -> set
- * set -> init
- */
-
-/**
- * All timer paths
- * 
- * (x, y): x(init), y(start)
- * 
- * (0,0): deconstruct, base
- * (1,0): init, set
- * (1,1): set
- * (0,1): NOT POSSIBLE
- * 
- * Valid paths:
- * (0,0) <-> (1,0) <-> (1,1)
- * (0,0) <- (1,1)
- * 		OR
- * (0,0) -> (1,0)
- * (1,0) -> (0,0)
- * (1,0) -> (1,1)
- * (1,1) -> (0,0)
- * (1,1) -> (1,0)
- * 
- * Invalid paths:
- * 
- * (0,0) -> (0,0)
- * (0,0) -> (1,0)
- * 
- * (1,0) -> (1,0)
- * 
- * (1,1) -> (1,1)
- */
-
 #include "timer_tests.h"
 #include "../test_cases.h"
 
@@ -101,13 +41,6 @@
 #endif
 
 /**
- * Initializes testing timer
- * 
- * @return bool: if initialization successful
- */
-#define INIT_TIMER() initHardTimer(HARD_TIMER_TEST, &HARD_TIMER_TEST_REFERENCE, HARD_TIMER_TEST_SCALAR)
-
-/**
  * Sets testing timer
  * 
  * @return bool: if set successful
@@ -121,13 +54,6 @@
  */
 #define CANCEL_TIMER() cancelHardTimer(HARD_TIMER_TEST)
 
-/**
- * Decontructs testing timer
- * 
- * @return bool: if deconstruct successful
- */
-#define DECONSTRUCT_TIMER() deconstructHardTimer(HARD_TIMER_TEST)
-
 /****************************
  * Fast Timer Defines
 ****************************/
@@ -135,13 +61,6 @@
 #define HARD_TIMER_FAST_TEST HARD_TIMER(HARD_TIMER_FAST_TEST_INDEX) // hardware timer for testing
 #define HARD_TIMER_FAST_TEST_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_FAST_TEST_INDEX) // starter function for testing
 #define HARD_TIMER_FAST_TEST_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_FAST_TEST_INDEX) // reference for testing function
-
-/**
- * Initializes testing timer
- * 
- * @return bool: if initialization successful
- */
-#define INIT_FAST_TIMER() initHardTimer(HARD_TIMER_FAST_TEST, &HARD_TIMER_FAST_TEST_REFERENCE, HARD_TIMER_FAST_TEST_SCALAR)
 
 /**
  * Sets testing timer
@@ -157,76 +76,11 @@
  */
 #define CANCEL_FAST_TIMER() cancelHardTimer(HARD_TIMER_FAST_TEST)
 
-/**
- * Decontructs testing timer
- * 
- * @return bool: if deconstruct successful
- */
-#define DECONSTRUCT_FAST_TIMER() deconstructHardTimer(HARD_TIMER_FAST_TEST)
-
-memCharString invalidInitFail[] PROG_FLASH = {"Init State"};
 memCharString invalidStartFail[] PROG_FLASH = {"Start State"};
-memCharString initFail[] PROG_FLASH = {"Init"};
-memCharString reinitFail[] PROG_FLASH = {"Reinit"};
 memCharString startFail[] PROG_FLASH = {"Start"};
 memCharString restartFail[] PROG_FLASH = {"Restart"};
 memCharString cancelFail[] PROG_FLASH = {"Stop"};
 memCharString recancelFail[] PROG_FLASH = {"Restop"};
-memCharString deconstructFail[] PROG_FLASH = {"Decon"};
-memCharString redeconstructFail[] PROG_FLASH = {"Redecon"};
-
-
-memCharString path00toIFail[] PROG_FLASH = {"00>I"};
-memCharString paths00toIFail[] PROG_FLASH = {"S00>I"};
-memCharString pathi00toIFail[] PROG_FLASH = {"I00>I"};
-
-memCharString path00toDFail[] PROG_FLASH = {"00>D"};
-memCharString paths00toDFail[] PROG_FLASH = {"S00>D"};
-memCharString pathi00toDFail[] PROG_FLASH = {"I00>D"};
-
-memCharString path00toCFail[] PROG_FLASH = {"00>C"};
-memCharString paths00toCFail[] PROG_FLASH = {"S00>C"};
-memCharString pathi00toCFail[] PROG_FLASH = {"I00>C"};
-
-memCharString path00toSFail[] PROG_FLASH = {"00>S"};
-memCharString paths00toSFail[] PROG_FLASH = {"S00>S"};
-memCharString pathi00toSFail[] PROG_FLASH = {"I00>S"};
-
-
-
-memCharString path01toIFail[] PROG_FLASH = {"01>I"};
-memCharString paths01toIFail[] PROG_FLASH = {"S01>I"};
-memCharString pathi01toIFail[] PROG_FLASH = {"I01>I"};
-
-memCharString path01toDFail[] PROG_FLASH = {"01>D"};
-memCharString paths01toDFail[] PROG_FLASH = {"S01>D"};
-memCharString pathi01toDFail[] PROG_FLASH = {"I01>D"};
-
-memCharString path01toCFail[] PROG_FLASH = {"01>C"};
-memCharString paths01toCFail[] PROG_FLASH = {"S01>C"};
-memCharString pathi01toCFail[] PROG_FLASH = {"I01>C"};
-
-memCharString path01toSFail[] PROG_FLASH = {"01>S"};
-memCharString paths01toSFail[] PROG_FLASH = {"S01>S"};
-memCharString pathi01toSFail[] PROG_FLASH = {"I01>S"};
-
-
-
-memCharString path11toIFail[] PROG_FLASH = {"11>I"};
-memCharString paths11toIFail[] PROG_FLASH = {"S11>I"};
-memCharString pathi11toIFail[] PROG_FLASH = {"I11>I"};
-
-memCharString path11toDFail[] PROG_FLASH = {"11>D"};
-memCharString paths11toDFail[] PROG_FLASH = {"S11>D"};
-memCharString pathi11toDFail[] PROG_FLASH = {"I11>D"};
-
-memCharString path11toCFail[] PROG_FLASH = {"11>C"};
-memCharString paths11toCFail[] PROG_FLASH = {"S11>C"};
-memCharString pathi11toCFail[] PROG_FLASH = {"I11>C"};
-
-memCharString path11toSFail[] PROG_FLASH = {"11>S"};
-memCharString paths11toSFail[] PROG_FLASH = {"S11>S"};
-memCharString pathi11toSFail[] PROG_FLASH = {"I11>S"};
 
 volatile uint32_t hardTimerCount = 0U;
 
@@ -236,31 +90,6 @@ volatile uint32_t hardTimerCount = 0U;
 HARD_TIMER_TEST_FUNCTION() {
 	hardTimerCount++;
 	HARD_TIMER_END();
-}
-
-/**
- * Tests timer init state
- * 
- * @param timer timer to test
- * @param init whether timer should or shouldn't be initialized
- */
-void testGetInitState(hardware_timer_t timer, bool init) {
-	if (hardTimerInitialized(timer) != init) {
-		printFail(invalidInitFail);
-	}
-}
-
-/**
- * Tests timer init state
- * 
- * @param timer timer to test
- * @param init whether timer should or shouldn't be initialized
- * @param initMessage message to print
- */
-void testGetInitStatePrint(hardware_timer_t timer, bool init, memCharString *initMessage) {
-	if (hardTimerInitialized(timer) != init) {
-		printFail(initMessage);
-	}
 }
 
 /**
@@ -276,65 +105,13 @@ void testGetStartState(hardware_timer_t timer, bool start) {
 }
 
 /**
- * Tests timer start state
- * 
- * @param timer timer to test
- * @param start whether timer should or shouldn't be started
- * @param startMessage message to print
- */
-void testGetStartStatePrint(hardware_timer_t timer, bool start, memCharString *startMessage) {
-	if (hardTimerStarted(timer) != start) {
-		printFail(startMessage);
-	}
-}
-
-/**
- * Tests timer states
- * 
- * @param timer timer to test
- * @param init whether timer should or shouldn't be initialized
- * @param start whether timer should or shouldn't be started
- */
-void testGetState(hardware_timer_t timer, bool init, bool start) {
-	testGetInitState(timer, init);
-	testGetStartState(timer, start);
-}
-
-/**
- * Tests timer states
- * 
- * @param timer timer to test
- * @param init whether timer should or shouldn't be initialized
- * @param start whether timer should or shouldn't be started
- * @param initMessage init message to print
- * @param startMessage start message to print
- */
-void testGetStatePrint(hardware_timer_t timer, bool init, bool start, memCharString *initMessage, memCharString *startMessage) {
-	testGetInitStatePrint(timer, init, initMessage);
-	testGetStartStatePrint(timer, start, startMessage);
-}
-
-/**
  * Tests that no timers are set when starting
  * 
  * @warning Only call when timers aren't started nor initialized
  */
 void testProgramStart() {
 	for (int i = 0; i < NUM_TIMERS; i++) {
-		testGetState((hardware_timer_t)i, false, false);
-	}
-}
-
-/**
- * Tests correct status for repeat initializations
- */
-void testRepeatInit() {
-
-	if (!INIT_TIMER()) {
-		printFail(initFail);
-	}
-	if (INIT_TIMER()) {
-		printFail(reinitFail);
+		testGetStartState((hardware_timer_t)i, false);
 	}
 }
 
@@ -364,183 +141,67 @@ void testRepeatCancel() {
 	}
 }
 
-/**
- * Tests correct status for repeat deconstructs
- */
-void testRepeatDeconstruct() {
-
-	if (!DECONSTRUCT_TIMER()) {
-		printFail(deconstructFail);
-	}
-	if (DECONSTRUCT_TIMER()) {
-		printFail(redeconstructFail);
-	}
-}
+#if defined(PLATFORMIO) && defined(UNOR3)
+	#include <Arduino.h>
+	#define MILLIS_DELAY
+#endif
 
 /**
- * Tests for all possible flag paths
+ * Tests slow timing accuracy
  */
-void testPathFlags() {
-
-	/**
-	 * (0,0)
-	 */
-	testGetState(HARD_TIMER_TEST, false, false);
-
-	// 00>D
-	if (DECONSTRUCT_TIMER()) {
-		printFail(path00toDFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, false, false, paths00toDFail, pathi00toDFail);
-	// 00>C
-	if (CANCEL_TIMER()) {
-		printFail(path00toCFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, false, false, paths00toCFail, pathi00toCFail);
-	// 00>S
-	if (SET_TIMER()) {
-		printFail(path00toSFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, false, false, paths00toSFail, pathi00toSFail);
-	// 00>I
-	if (!INIT_TIMER()) {
-		printFail(path00toIFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, false, paths00toIFail, pathi00toIFail);
-
-	/**
-	 * (1,0)
-	 */
-
-	// 10>I
-	if (INIT_TIMER()) {
-		printFail(path01toIFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, false, paths01toIFail, pathi01toIFail);
-	// 10>C
-	if (CANCEL_TIMER()) {
-		printFail(path01toCFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, false, paths01toCFail, pathi01toCFail);
-	// 10>S
-	if (!SET_TIMER()) {
-		printFail(path01toSFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, true, paths01toSFail, pathi01toSFail);
-
-	/**
-	 * (1,1)
-	 */
-	
-	// 11>I
-	if (INIT_TIMER()) {
-		printFail(path11toIFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, true, paths11toIFail, pathi11toIFail);
-	// 11>S
-	if (SET_TIMER()) {
-		printFail(path11toSFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, true, paths11toSFail, pathi11toSFail);
-	// 11>C
-	if (!CANCEL_TIMER()) {
-		printFail(path11toCFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, false, paths11toCFail, pathi11toCFail);
-
-	/**
-	 * (1,0)
-	 */
-	
-	// 10>D
-	if (!DECONSTRUCT_TIMER()) {
-		printFail(path01toDFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, false, false, paths01toDFail, pathi01toDFail);
-
-	/**
-	 * (0,0)
-	 */
-
-	// 00>I
-	if (!INIT_TIMER()) {
-		printFail(path00toIFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, false, paths00toIFail, pathi00toIFail);
-
-	/**
-	 * (1,0)
-	 */
-
-	// 10>S
-	if (!SET_TIMER()) {
-		printFail(path01toSFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, true, true, paths01toSFail, pathi01toSFail);
-
-	/**
-	 * (1,1)
-	 */
-
-	// 11>D
-	if (!DECONSTRUCT_TIMER()) {
-		printFail(path11toDFail);
-	}
-	testGetStatePrint(HARD_TIMER_TEST, false, false, paths11toDFail, pathi11toDFail);
-
-	/**
-	 * (0,0)
-	 */
-	testGetState(HARD_TIMER_TEST, false, false);
-}
-
 void testTiming() {
 
-	testGetState(HARD_TIMER_TEST, false, false);
+	testGetStartState(HARD_TIMER_TEST, false);
 	hardTimerCount = 0U;
 
-	if (!INIT_TIMER()) {
-		printFail(initFail);
-	}
 	if (!SET_TIMER()) {
 		printFail(startFail);
 	}
 
-	hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
-	if (!DECONSTRUCT_TIMER()) {
-		printFail(deconstructFail);
+	#ifdef MILLIS_DELAY
+		delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	#else
+		hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	#endif
+
+	if (!CANCEL_TIMER()) {
+		printFail(cancelFail);
 	}
 
 	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_TEST_COUNT_BUFFER, HARD_TIMER_TEST_COUNT_TARGET, hardTimerCount);
 }
 
+/**
+ * Tests fast timing accuracy
+ */
 void testFastTiming() {
 
-	testGetState(HARD_TIMER_FAST_TEST, false, false);
+	testGetStartState(HARD_TIMER_TEST, false);
 	hardTimerCount = 0U;
+	volatile uint32_t result = 0U;
 
-	if (!INIT_FAST_TIMER()) {
-		printFail(initFail);
-	}
 	if (!SET_FAST_TIMER()) {
 		printFail(startFail);
 	}
 
-	hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
-	if (!DECONSTRUCT_FAST_TIMER()) {
-		printFail(deconstructFail);
+	#ifdef MILLIS_DELAY
+		delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	#else
+		hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+	#endif
+
+	result = hardTimerCount;
+	if (!CANCEL_FAST_TIMER()) {
+		printFail(cancelFail);
 	}
 
-	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_FAST_TEST_COUNT_BUFFER, HARD_TIMER_FAST_TEST_COUNT_TARGET, hardTimerCount);
+	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_FAST_TEST_COUNT_BUFFER, HARD_TIMER_FAST_TEST_COUNT_TARGET, result);
 }
 
 void testTimers() {
 	RUN_TEST(&testProgramStart);
-	RUN_TEST(&testRepeatInit);
 	RUN_TEST(&testRepeatStart);
 	RUN_TEST(&testRepeatCancel);
-	RUN_TEST(&testRepeatDeconstruct);
-	RUN_TEST(&testPathFlags);
 	RUN_TEST(&testTiming);
 	RUN_TEST(&testFastTiming);
 }
