@@ -25,56 +25,23 @@
 #include <hard_timer.h>
 #include <board_common.h>
 
-/****************************
- * Slow Timer Defines
-****************************/
-
-#define HARD_TIMER_TEST HARD_TIMER(HARD_TIMER_TEST_INDEX) // hardware timer for testing
-#define HARD_TIMER_TEST_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_TEST_INDEX) // starter function for testing
-#define HARD_TIMER_TEST_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_TEST_INDEX) // reference for testing function
-
-#define HARD_TIMER_TEST_DELAY_MS 100 // delay for each iteration of timer
-#define HARD_TIMER_TEST_DELAY_ELLAPSE_MS 1000 // time for timer to run for
-#define HARD_TIMER_TEST_COUNT_TARGET HARD_TIMER_TEST_DELAY_ELLAPSE_MS / HARD_TIMER_TEST_DELAY_MS // target count for timer
-#ifndef HARD_TIMER_TEST_COUNT_BUFFER
-	#define HARD_TIMER_TEST_COUNT_BUFFER 0 // amount timer can be off of goal
+#define TEST_SLOW_FREQ 10 // frequency for testing slow timing
+#ifndef TEST_FAST_FREQ
+	#define TEST_FAST_FREQ 10000
 #endif
 
-/**
- * Sets testing timer
- * 
- * @return bool: if set successful
- */
-#define SET_TIMER() setHardTimer(HARD_TIMER_TEST, &HARD_TIMER_TEST_REFERENCE, HARD_TIMER_TEST_SCALAR, HARD_TIMER_TEST_MULTIPLIER * HARD_TIMER_TEST_DELAY_MS)
+#define SET_SLOW_TIMER(timer, freq) setHardTimer(&timer, &freq, &testTimingFunction, 0)
+#define SET_FAST_TIMER(timer, freq) setHardTimer(&timer, &freq, &testTimingFunction, 255)
+#define CANCEL_TIMER(timer) cancelHardTimer(timer)
 
-/**
- * Cancels testing timer
- * 
- * @return bool: if set successful
- */
-#define CANCEL_TIMER() cancelHardTimer(HARD_TIMER_TEST)
+#define TEST_DELAY_ELLAPSE_MS 1000 // time for timer to run for
 
-/****************************
- * Fast Timer Defines
-****************************/
-
-#define HARD_TIMER_FAST_TEST HARD_TIMER(HARD_TIMER_FAST_TEST_INDEX) // hardware timer for testing
-#define HARD_TIMER_FAST_TEST_FUNCTION() HARD_TIMER_FUNCTION(HARD_TIMER_FAST_TEST_INDEX) // starter function for testing
-#define HARD_TIMER_FAST_TEST_REFERENCE HARD_TIMER_REFERENCE(HARD_TIMER_FAST_TEST_INDEX) // reference for testing function
-
-/**
- * Sets testing timer
- * 
- * @return bool: if set successful
- */
-#define SET_FAST_TIMER() setHardTimer(HARD_TIMER_FAST_TEST, &HARD_TIMER_FAST_TEST_REFERENCE, HARD_TIMER_FAST_TEST_SCALAR, HARD_TIMER_FAST_TEST_MULTIPLIER * HARD_TIMER_FAST_TEST_DELAY)
-
-/**
- * Cancels testing timer
- * 
- * @return bool: if set successful
- */
-#define CANCEL_FAST_TIMER() cancelHardTimer(HARD_TIMER_FAST_TEST)
+#ifndef SLOW_TEST_BUFFER
+	#define SLOW_TEST_BUFFER 0 // amount slow timer can be off of goal
+#endif
+#ifndef FAST_TEST_BUFFER
+	#define FAST_TEST_BUFFER 1 // amount fast timer can be off of goal
+#endif
 
 memCharString invalidStartFail[] PROG_FLASH = {"Start State"};
 memCharString startFail[] PROG_FLASH = {"Start"};
@@ -87,7 +54,7 @@ volatile uint32_t hardTimerCount = 0U;
 /**
  * Testing function
  */
-HARD_TIMER_TEST_FUNCTION() {
+hard_timer_return_t RUN_IN_RAM(testTimingFunction) testTimingFunction(hard_timer_param_t emptyParams) {
 	hardTimerCount++;
 	HARD_TIMER_END();
 }
@@ -98,7 +65,7 @@ HARD_TIMER_TEST_FUNCTION() {
  * @param timer timer to test
  * @param start whether timer should or shouldn't be started
  */
-void testGetStartState(hardware_timer_t timer, bool start) {
+void testGetStartState(hard_timer_t timer, bool start) {
 	if (hardTimerStarted(timer) != start) {
 		printFail(invalidStartFail);
 	}
@@ -111,32 +78,28 @@ void testGetStartState(hardware_timer_t timer, bool start) {
  */
 void testProgramStart() {
 	for (int i = 0; i < NUM_TIMERS; i++) {
-		testGetStartState((hardware_timer_t)i, false);
+		testGetStartState((hard_timer_t)i, false);
 	}
 }
 
 /**
- * Tests correct status for repeat starts
+ * Tests correct status for repeat starts and cancels
  */
-void testRepeatStart() {
+void testRepeat() {
 
-	if (!SET_TIMER()) {
+	freq_t freq = TEST_SLOW_FREQ;
+	hard_timer_t timer = HARD_TIMER_INVALID;
+
+	if (!SET_SLOW_TIMER(timer, freq)) {
 		printFail(startFail);
 	}
-	if (SET_TIMER()) {
+	if (SET_SLOW_TIMER(timer, freq)) {
 		printFail(restartFail);
 	}
-}
-
-/**
- * Tests correct status for repeat cancels
- */
-void testRepeatCancel() {
-
-	if (!CANCEL_TIMER()) {
+	if (!CANCEL_TIMER(timer)) {
 		printFail(cancelFail);
 	}
-	if (CANCEL_TIMER()) {
+	if (CANCEL_TIMER(timer)) {
 		printFail(recancelFail);
 	}
 }
@@ -151,24 +114,27 @@ void testRepeatCancel() {
  */
 void testTiming() {
 
-	testGetStartState(HARD_TIMER_TEST, false);
+	hard_timer_t timer = HARD_TIMER_INVALID;
+	freq_t freq = TEST_SLOW_FREQ;
+
+	testGetStartState(timer, false);
 	hardTimerCount = 0U;
 
-	if (!SET_TIMER()) {
+	if (!SET_SLOW_TIMER(timer, freq)) {
 		printFail(startFail);
 	}
 
 	#ifdef MILLIS_DELAY
-		delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+		delay(TEST_DELAY_ELLAPSE_MS);
 	#else
-		hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+		hardDelayMS(TEST_DELAY_ELLAPSE_MS);
 	#endif
 
-	if (!CANCEL_TIMER()) {
+	if (!CANCEL_TIMER(timer)) {
 		printFail(cancelFail);
 	}
 
-	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_TEST_COUNT_BUFFER, HARD_TIMER_TEST_COUNT_TARGET, hardTimerCount);
+	TEST_ASSERT_UINT32_WITHIN(SLOW_TEST_BUFFER, TEST_SLOW_FREQ, hardTimerCount);
 }
 
 /**
@@ -176,32 +142,34 @@ void testTiming() {
  */
 void testFastTiming() {
 
-	testGetStartState(HARD_TIMER_TEST, false);
+	hard_timer_t timer = HARD_TIMER_INVALID;
+	freq_t freq = TEST_FAST_FREQ;
+
+	testGetStartState(timer, false);
 	hardTimerCount = 0U;
 	volatile uint32_t result = 0U;
 
-	if (!SET_FAST_TIMER()) {
+	if (!SET_FAST_TIMER(timer, freq)) {
 		printFail(startFail);
 	}
 
 	#ifdef MILLIS_DELAY
-		delay(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+		delay(TEST_DELAY_ELLAPSE_MS);
 	#else
-		hardDelayMS(HARD_TIMER_TEST_DELAY_ELLAPSE_MS);
+		hardDelayMS(TEST_DELAY_ELLAPSE_MS);
 	#endif
 
 	result = hardTimerCount;
-	if (!CANCEL_FAST_TIMER()) {
+	if (!CANCEL_TIMER(timer)) {
 		printFail(cancelFail);
 	}
 
-	TEST_ASSERT_UINT32_WITHIN(HARD_TIMER_FAST_TEST_COUNT_BUFFER, HARD_TIMER_FAST_TEST_COUNT_TARGET, result);
+	TEST_ASSERT_UINT32_WITHIN(FAST_TEST_BUFFER, freq, result);
 }
 
 void testTimers() {
 	RUN_TEST(&testProgramStart);
-	RUN_TEST(&testRepeatStart);
-	RUN_TEST(&testRepeatCancel);
+	RUN_TEST(&testRepeat);
 	RUN_TEST(&testTiming);
 	RUN_TEST(&testFastTiming);
 }
