@@ -49,6 +49,19 @@ void printIgnore(memCharString *message);
  */
 void printFail(memCharString *message);
 
+#ifdef TEST_DELAY_RUNNER
+	/**
+	 * Runs delay for testing fast timer
+	 * 
+	 * @param seconds seconds to delay for
+	 * 
+	 * @return if able to run
+	 * 
+	 * @warning may not be very accurate
+	 */
+	bool testDelayRunner(uint8_t seconds);
+#endif
+
 #ifdef __cplusplus
 }
 #endif
