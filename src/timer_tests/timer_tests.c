@@ -41,7 +41,7 @@
 #define SLOW_TIMER_PRIORITY 0 // slow timer priority
 #define FAST_TIMER_PRIORITY 255 // fast timer priority
 
-#define TEST_DELAY_ELLAPSE_MS 1000 // time for timer to run for
+#define TEST_DELAY_ELLAPSE_S 1 // time for timer to run for
 
 #ifndef SLOW_TEST_BUFFER
 	#define SLOW_TEST_BUFFER 0 // amount slow timer can be off of goal
@@ -93,6 +93,22 @@ memCharString cancelLoopFail[] PROG_FLASH = {"Cancel Loop"};
 memCharString cancelInvalidFail[] PROG_FLASH = {"Cancel Invalid"};
 memCharString startedLoopFail[] PROG_FLASH = {"Started Loop"};
 memCharString didntStopFail[] PROG_FLASH = {"Didn't Stop"};
+
+/**
+ * Priority claim statements
+ * P: Priority
+ * S: Started
+ * N: Not Started
+ * C: Claimed
+ * U: Unclaimed
+ */
+
+memCharString pNotStartedClaimedFail[] PROG_FLASH = {"PNC"};
+memCharString pNotStartedClaimedUnequalFail[] PROG_FLASH = {"PNC Unequal"};
+memCharString pStartedClaimedFail[] PROG_FLASH = {"PSC"};
+memCharString pStartedClaimedUnequalFail[] PROG_FLASH = {"PSC Unequal"};
+memCharString pStartedUnclaimedFail[] PROG_FLASH = {"PSU"};
+memCharString pStartedUnclaimedUnequalFail[] PROG_FLASH = {"PSU Unequal"};
 
 #ifdef TEST_DELAY_RUNNER
 	memCharString cantTestFastFail[] PROG_FLASH = {"Can't Test Fast"};
@@ -157,8 +173,12 @@ void testRepeat() {
 		printFail(noSetTimerFail);
 	}
 
+	hard_timer_t secondTimer = timer;
 	freq = TEST_CASES_FREQ;
-	if (setHardTimer(&timer, &freq, &testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (!setHardTimer(&secondTimer, &freq, &testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+		printFail(startFail);
+	}
+	if (timer == secondTimer) {
 		printFail(restartFail);
 	}
 
@@ -345,37 +365,51 @@ void testStart(void) {
 		printFail(notStartFail);
 	}
 	timer = HARD_TIMER_INVALID;
+}
 
-	// set same timer
+/**
+ * Tests timer priorities are set according
+ * to 'hard_timer.h'. Best Timer ignored
+ */
+void testTimerPriority() {
+	
+	resetTimers();
+
+	hard_timer_t timer = HARD_TIMER_INVALID;
+	hard_timer_t secondTimer = HARD_TIMER_INVALID;
+	freq_t freq = TEST_CASES_FREQ;
+
+	// test timer claimed and unstarted
+	timer = claimTimer(NULL);
+	secondTimer = timer;
+	if (!setHardTimer(&secondTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+		printFail(pNotStartedClaimedFail);
+	}
+
+	if (timer != secondTimer) {
+		printFail(pNotStartedClaimedUnequalFail);
+	}
+
+	// test timer claimed and started
 	freq = TEST_CASES_FREQ;
-	if (!setHardTimer(&timer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
-		printFail(startFail);
+	if (setHardTimer(&secondTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+		printFail(pStartedClaimedFail);
 	}
-	hard_timer_t tempTimer = timer;
-	if (setHardTimer(&tempTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
-		printFail(sameTimerFail);
+
+	if (timer != secondTimer) {
+		printFail(pStartedClaimedUnequalFail);
 	}
-	// both started
-	if (!hardTimerStarted(timer)) {
-		printFail(isStartFail);
+
+	// test timer unclaimed and started
+	unclaimTimer(secondTimer);
+
+	if (!setHardTimer(&secondTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+		printFail(pStartedUnclaimedFail);
 	}
-	if (!hardTimerStarted(tempTimer)) {
-		printFail(isStartFail);
+
+	if (timer == secondTimer) {
+		printFail(pStartedUnclaimedUnequalFail);
 	}
-	if (tempTimer != timer) {
-		printFail(notSameTimerFail);
-	}
-	// both ened
-	if (!cancelHardTimer(timer)) {
-		printFail(cancelFail);
-	}
-	if (hardTimerStarted(timer)) {
-		printFail(notStartFail);
-	}
-	if (hardTimerStarted(tempTimer)) {
-		printFail(notStartFail);
-	}
-	timer = HARD_TIMER_INVALID;
 }
 
 /**
@@ -393,7 +427,7 @@ void testSlowTiming() {
 		printFail(startFail);
 	}
 
-	hardDelayMS(TEST_DELAY_ELLAPSE_MS);
+	hardDelayMS(TEST_DELAY_ELLAPSE_S * 1000);
 
 	if (!cancelHardTimer(functionTimer)) {
 		printFail(cancelFail);
@@ -413,16 +447,27 @@ void testFastTiming() {
 	testGetStartState(functionTimer, false);
 	hardTimerCount = 0U;
 
+	#ifdef TEST_DELAY_RUNNER
+		hard_timer_t slowTimer = HARD_TIMER_INVALID;
+		{
+			struct hardTimerPriority priority;
+			priority.slowestTimer = true;
+			slowTimer = claimTimer(&priority);
+		}
+		
+	#endif
+
 	if (!setHardTimer(&functionTimer, &freq, &testTimingFunction, FAST_TIMER_PRIORITY)) {
 		printFail(startFail);
 	}
 
 	#ifdef TEST_DELAY_RUNNER
-		if (!testDelayRunner(TEST_DELAY_ELLAPSE_MS / 1000)) {
+		if (!testDelayRunner(slowTimer, TEST_DELAY_ELLAPSE_S)) {
 			printFail(cantTestFastFail);
 		}
+		unclaimTimer(slowTimer);
 	#else
-		hardDelayMS(TEST_DELAY_ELLAPSE_MS);
+		hardDelayMS(TEST_DELAY_ELLAPSE_S * 1000);
 	#endif
 
 	if (!cancelHardTimer(functionTimer)) {
@@ -437,6 +482,7 @@ void testTimers() {
 	RUN_TEST(&testRepeat);
 	RUN_TEST(&testClaims);
 	RUN_TEST(&testStart);
+	RUN_TEST(&testTimerPriority);
 	RUN_TEST(&testSlowTiming);
 	RUN_TEST(&testFastTiming);
 }

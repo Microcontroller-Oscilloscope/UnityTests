@@ -17,7 +17,6 @@
 */
 
 #include "test_cases.h"
-#include <hard_timer.h>
 
 #ifdef EMPTY_PROG_FLASH
 
@@ -71,18 +70,15 @@ void printFail(memCharString *message) {
 		HARD_TIMER_END();
 	}
 
-	bool testDelayRunner(uint8_t seconds) {
-		hard_timer_t functionTimer = HARD_TIMER_INVALID;
+	bool testDelayRunner(hard_timer_t slowTimer, uint8_t seconds) {
 		freq_t freq = 1;
 		slowCount = 0;
-		if (!setHardTimer(&functionTimer, &freq, &slowCounter, DEFAULT_HARD_TIMER_PRIORITY)) {
+		if (!setHardTimer(&slowTimer, &freq, &slowCounter, DEFAULT_HARD_TIMER_PRIORITY)) {
 			return false;
 		}
 		while (slowCount < seconds) {}
-		cancelHardTimer(functionTimer);
+		cancelHardTimer(slowTimer);
 		return true;
 	}
-
-	
 
 #endif

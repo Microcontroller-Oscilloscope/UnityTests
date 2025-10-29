@@ -50,6 +50,8 @@ void printIgnore(memCharString *message);
 void printFail(memCharString *message);
 
 #ifdef TEST_DELAY_RUNNER
+
+	#include <hard_timer.h>
 	/**
 	 * Runs delay for testing fast timer
 	 * 
@@ -59,7 +61,7 @@ void printFail(memCharString *message);
 	 * 
 	 * @warning may not be very accurate
 	 */
-	bool testDelayRunner(uint8_t seconds);
+	bool testDelayRunner(hard_timer_t slowTimer, uint8_t seconds);
 #endif
 
 #ifdef __cplusplus
