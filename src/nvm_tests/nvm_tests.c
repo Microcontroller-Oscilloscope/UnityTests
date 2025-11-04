@@ -17,7 +17,9 @@
 */
 
 #include "nvm_tests.h"
+#include "../test_cases.h"
 
+#include <nvm/nvm.h>
 #include <comm/hard_serial/hard_serial.h>
 
 // nvm operations error strings

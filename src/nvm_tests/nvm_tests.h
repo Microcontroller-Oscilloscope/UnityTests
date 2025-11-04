@@ -19,12 +19,7 @@
 #ifndef NVM_TESTS_H
 #define NVM_TESTS_H
 
-
-#include <compile_flags/compile_flags.h>
 #include <nvm/eeprom_addresses.h>
-#include "../test_cases.h"
-#include <unity.h>
-#include <nvm/nvm.h>
 
 #ifndef CRIT_END_KEY
 	#error CRIT_END_KEY not found for nvm_tests.h

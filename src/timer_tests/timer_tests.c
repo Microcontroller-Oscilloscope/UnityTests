@@ -21,9 +21,8 @@
 
 #if NUM_TIMERS > 0
 
-#include <compile_flags/compile_flags.h>
-#include <hard_timer.h>
-#include <board_common.h>
+#include <osc_common/common_timer.h>
+#include <osc_common/common_thread.h>
 
 #define TEST_SLOW_FREQ 10 // frequency for testing slow timing
 #ifndef TEST_FAST_FREQ
@@ -109,10 +108,6 @@ memCharString pStartedClaimedFail[] PROG_FLASH = {"PSC"};
 memCharString pStartedClaimedUnequalFail[] PROG_FLASH = {"PSC Unequal"};
 memCharString pStartedUnclaimedFail[] PROG_FLASH = {"PSU"};
 memCharString pStartedUnclaimedUnequalFail[] PROG_FLASH = {"PSU Unequal"};
-
-#ifdef TEST_DELAY_RUNNER
-	memCharString cantTestFastFail[] PROG_FLASH = {"Can't Test Fast"};
-#endif
 
 volatile uint32_t hardTimerCount = 0U;
 
@@ -413,17 +408,20 @@ void testTimerPriority() {
 }
 
 /**
- * Tests slow timing accuracy
+ * Tests timing for hardware timer
+ * 
+ * @param freq target frequency to run at
+ * @param buffer amount actual freq can be off
+ * @param priority priority to run timer function at
  */
-void testSlowTiming() {
+void testTiming(freq_t freq, uint8_t buffer, timer_priority_t priority) {
 	resetTimers();
 	hard_timer_t functionTimer = HARD_TIMER_INVALID;
-	freq_t freq = TEST_SLOW_FREQ;
 
 	testGetStartState(functionTimer, false);
 	hardTimerCount = 0U;
 
-	if (!setHardTimer(&functionTimer, &freq, &testTimingFunction, SLOW_TIMER_PRIORITY)) {
+	if (!setHardTimer(&functionTimer, &freq, &testTimingFunction, priority)) {
 		printFail(startFail);
 	}
 
@@ -433,48 +431,21 @@ void testSlowTiming() {
 		printFail(cancelFail);
 	}
 
-	TEST_ASSERT_UINT32_WITHIN(SLOW_TEST_BUFFER, freq, hardTimerCount);
+	TEST_ASSERT_UINT32_WITHIN(buffer, freq, hardTimerCount);
+}
+
+/**
+ * Tests slow timing accuracy
+ */
+void testSlowTiming() {
+	testTiming(TEST_SLOW_FREQ, SLOW_TEST_BUFFER, SLOW_TIMER_PRIORITY);
 }
 
 /**
  * Tests fast timing accuracy
  */
 void testFastTiming() {
-	resetTimers();
-	hard_timer_t functionTimer = HARD_TIMER_INVALID;
-	freq_t freq = TEST_FAST_FREQ;
-
-	testGetStartState(functionTimer, false);
-	hardTimerCount = 0U;
-
-	#ifdef TEST_DELAY_RUNNER
-		hard_timer_t slowTimer = HARD_TIMER_INVALID;
-		{
-			struct hardTimerPriority priority;
-			priority.slowestTimer = true;
-			slowTimer = claimTimer(&priority);
-		}
-		
-	#endif
-
-	if (!setHardTimer(&functionTimer, &freq, &testTimingFunction, FAST_TIMER_PRIORITY)) {
-		printFail(startFail);
-	}
-
-	#ifdef TEST_DELAY_RUNNER
-		if (!testDelayRunner(slowTimer, TEST_DELAY_ELLAPSE_S)) {
-			printFail(cantTestFastFail);
-		}
-		unclaimTimer(slowTimer);
-	#else
-		hardDelayMS(TEST_DELAY_ELLAPSE_S * 1000);
-	#endif
-
-	if (!cancelHardTimer(functionTimer)) {
-		printFail(cancelFail);
-	}
-
-	TEST_ASSERT_UINT32_WITHIN(FAST_TEST_BUFFER, freq, hardTimerCount);
+	testTiming(TEST_FAST_FREQ, FAST_TEST_BUFFER, FAST_TIMER_PRIORITY);
 }
 
 void testTimers() {

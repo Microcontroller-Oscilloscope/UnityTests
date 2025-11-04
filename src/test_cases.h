@@ -20,6 +20,7 @@
 #define TEST_CASES_H
 
 #include <compile_flags/compile_flags.h>
+#include <board.h>
 
 // version of microcontroller oscilloscope unity tests
 #define OSC_TEST_MAJOR_VERSION 0
@@ -48,21 +49,6 @@ void printIgnore(memCharString *message);
  * @param message flash message to print
  */
 void printFail(memCharString *message);
-
-#ifdef TEST_DELAY_RUNNER
-
-	#include <hard_timer.h>
-	/**
-	 * Runs delay for testing fast timer
-	 * 
-	 * @param seconds seconds to delay for
-	 * 
-	 * @return if able to run
-	 * 
-	 * @warning may not be very accurate
-	 */
-	bool testDelayRunner(hard_timer_t slowTimer, uint8_t seconds);
-#endif
 
 #ifdef __cplusplus
 }

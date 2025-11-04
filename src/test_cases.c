@@ -18,7 +18,7 @@
 
 #include "test_cases.h"
 
-#ifdef EMPTY_PROG_FLASH
+#ifndef NO_PROGMEM_COPY_SUPPORT
 
 void printIgnore(memCharString *message) {
 	TEST_IGNORE_MESSAGE(message);
@@ -58,27 +58,5 @@ void printFail(memCharString *message) {
 	copyMessage(message, buffer, messageSize);
 	TEST_FAIL_MESSAGE(buffer);
 }
-
-#endif
-
-#ifdef TEST_DELAY_RUNNER
-
-	volatile uint8_t slowCount = 0U;
-
-	hard_timer_return_t RUN_IN_RAM(slowCounter) slowCounter(hard_timer_param_t emptyParams) {
-		slowCount++;
-		HARD_TIMER_END();
-	}
-
-	bool testDelayRunner(hard_timer_t slowTimer, uint8_t seconds) {
-		freq_t freq = 1;
-		slowCount = 0;
-		if (!setHardTimer(&slowTimer, &freq, &slowCounter, DEFAULT_HARD_TIMER_PRIORITY)) {
-			return false;
-		}
-		while (slowCount < seconds) {}
-		cancelHardTimer(slowTimer);
-		return true;
-	}
 
 #endif
