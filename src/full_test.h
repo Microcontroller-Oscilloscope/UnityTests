@@ -46,8 +46,10 @@ void fullTest(void);
 
 #define NVM_TEST_SIZE TEST_NVM_END_KEY
 
-#if NVM_TEST_SIZE > NVM_SIZE
-	#error NVM_SIZE not large enough for testing
+#ifdef NVM_SIZE
+	#if NVM_TEST_SIZE > NVM_SIZE
+		#error NVM_SIZE not large enough for testing
+	#endif
 #endif
 
 #endif

@@ -20,7 +20,9 @@
 #define TEST_CASES_H
 
 #include <compile_flags/compile_flags.h>
-#include <board.h>
+#if SUPPORTED_PLATFORM
+	#include <board.h>
+#endif
 
 // version of microcontroller oscilloscope unity tests
 #define OSC_TEST_MAJOR_VERSION 0

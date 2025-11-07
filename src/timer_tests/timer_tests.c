@@ -460,10 +460,10 @@ void testTimers() {
 
 #else
 
-memCharString passIgnore[] PROG_FLASH = {"Ignoring timer tests"};
+memCharString passTimerIgnore[] PROG_FLASH = {"Ignoring timer tests"};
 
 void passTimers() {
-	printIgnore(passIgnore);
+	printIgnore(passTimerIgnore);
 }
 
 void testTimers() {

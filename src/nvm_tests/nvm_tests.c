@@ -20,6 +20,7 @@
 #include "../test_cases.h"
 
 #include <nvm/nvm.h>
+
 #include <comm/hard_serial/hard_serial.h>
 
 // nvm operations error strings
@@ -72,6 +73,19 @@ void nvmNotStarted(void) {
 	if (!nvmInitialized()) {
 		printFail(callInitFail);
 	}
+}
+
+/**
+ * Gets nvm size of EEPROM
+ */
+nvm_size_t getNVMSize() {
+	#ifdef NVM_SIZE
+		return NVM_SIZE;
+	#else
+		nvm_size_t nvmSize = 0;
+		nvmMaxSize(&nvmSize);
+		return nvmSize;
+	#endif
 }
 
 /**
@@ -223,7 +237,7 @@ void testNVMInit() {
 	}
 
 	// tests starting nvm
-	startCode = nvmInit(NVM_SIZE);
+	startCode = nvmInit(getNVMSize());
 	if (startCode == NVM_STARTED) {
 		printFail(nvmStartedFail);
 	}
@@ -242,7 +256,7 @@ void testNVMInit() {
 	 */
 
 	// tests trying to start again
-	startCode = nvmInit(NVM_SIZE);
+	startCode = nvmInit(getNVMSize());
 	if (startCode != NVM_STARTED) {
 		printFail(nvmStartedFail);
 	}
