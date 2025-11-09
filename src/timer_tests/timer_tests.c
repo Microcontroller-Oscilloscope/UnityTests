@@ -19,9 +19,10 @@
 #include "timer_tests.h"
 #include "../test_cases.h"
 
+#include <osc_common/common_timer.h>
+
 #if NUM_TIMERS > 0
 
-#include <osc_common/common_timer.h>
 #include <osc_common/common_thread.h>
 
 #define TEST_SLOW_FREQ 10 // frequency for testing slow timing

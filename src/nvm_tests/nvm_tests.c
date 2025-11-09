@@ -40,6 +40,7 @@ memCharString initTestedIgnore[] PROG_FLASH = {"NVM tested"};
 memCharString notInitFail[] PROG_FLASH = {"Not init"};
 memCharString nvmStartedFail[] PROG_FLASH = {"NVM started"};
 memCharString size0Fail[] PROG_FLASH = {"Size 0"};
+memCharString sizeMaxFail[] PROG_FLASH = {"Size Max"};
 memCharString initStopFail[] PROG_FLASH = {"stop"};
 memCharString initInitFail[] PROG_FLASH = {"init"};
 
@@ -73,19 +74,6 @@ void nvmNotStarted(void) {
 	if (!nvmInitialized()) {
 		printFail(callInitFail);
 	}
-}
-
-/**
- * Gets nvm size of EEPROM
- */
-nvm_size_t getNVMSize() {
-	#ifdef NVM_SIZE
-		return NVM_SIZE;
-	#else
-		nvm_size_t nvmSize = 0;
-		nvmMaxSize(&nvmSize);
-		return nvmSize;
-	#endif
 }
 
 /**
@@ -216,7 +204,7 @@ void testNVMInit() {
 
 	// test setting default when nvm not started
 	defaultCode = nvmSetDefaults();
-	if (defaultCode != NVM_DEFAULT_FAIL_MAX_SIZE) {
+	if (defaultCode != NVM_DEFAULT_NOT_STARTED) {
 		printFail(defaultMaxSizeFail);
 	}
 
@@ -224,6 +212,12 @@ void testNVMInit() {
 	startCode = nvmInit(DEFAULT_NVM_SIZE);
 	if (startCode != NVM_INVALID_SIZE) {
 		printFail(size0Fail);
+	}
+
+	// test initialization with max size too large
+	startCode = nvmInit(nvmMaxSize() + 1);
+	if (startCode != NVM_INVALID_SIZE) {
+		printFail(sizeMaxFail);
 	}
 
 	// tests getting/writing value prematurely
@@ -237,7 +231,7 @@ void testNVMInit() {
 	}
 
 	// tests starting nvm
-	startCode = nvmInit(getNVMSize());
+	startCode = nvmInit(nvmMaxSize());
 	if (startCode == NVM_STARTED) {
 		printFail(nvmStartedFail);
 	}
@@ -256,7 +250,7 @@ void testNVMInit() {
 	 */
 
 	// tests trying to start again
-	startCode = nvmInit(getNVMSize());
+	startCode = nvmInit(nvmMaxSize());
 	if (startCode != NVM_STARTED) {
 		printFail(nvmStartedFail);
 	}
