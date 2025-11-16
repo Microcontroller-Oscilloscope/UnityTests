@@ -27,7 +27,7 @@
 
 #define TEST_SLOW_FREQ 10 // frequency for testing slow timing
 #ifndef TEST_FAST_FREQ
-	#define TEST_FAST_FREQ 10000 // target frequency
+	#define TEST_FAST_FREQ HARD_TIMER_FREQ_MAX // target frequency
 #endif
 
 /**

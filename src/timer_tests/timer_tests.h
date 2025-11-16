@@ -21,14 +21,6 @@
 
 #include <compile_flags/compile_flags.h>
 
-#if SUPPORTED_ESP32
-	#define TEST_FAST_FREQ 200000 // target frequency
-#elif SUPPORTED_PICO
-	#define TEST_FAST_FREQ 300000 // target frequency
-#elif SUPPORTED_AVR
-	#define TEST_FAST_FREQ 140000 // target frequency
-#endif
-
 #ifdef __cplusplus
 extern "C" {
 #endif
