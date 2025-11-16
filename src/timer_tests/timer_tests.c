@@ -115,9 +115,15 @@ volatile uint32_t hardTimerCount = 0U;
 /**
  * Testing function
  */
-hard_timer_return_t RUN_IN_RAM(testTimingFunction) testTimingFunction(hard_timer_param_t emptyParams) {
+void RUN_IN_RAM(testTimingFunction) testTimingFunction(void *params) {
 	hardTimerCount++;
-	HARD_TIMER_END();
+}
+
+/**
+ * Testing function
+ */
+void RUN_IN_RAM(testTimingFunctionParams) testTimingFunctionParams(void *params) {
+	hardTimerCount += *(uint32_t*)params;
 }
 
 /**
@@ -162,7 +168,7 @@ void testRepeat() {
 	freq_t freq = TEST_CASES_FREQ;
 	hard_timer_t timer = HARD_TIMER_INVALID;
 
-	if (!setHardTimer(&timer, &freq, &testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (!setHardTimer(&timer, &freq, &testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(startFail);
 	}
 	if (timer == HARD_TIMER_INVALID) {
@@ -171,7 +177,7 @@ void testRepeat() {
 
 	hard_timer_t secondTimer = timer;
 	freq = TEST_CASES_FREQ;
-	if (!setHardTimer(&secondTimer, &freq, &testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (!setHardTimer(&secondTimer, &freq, &testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(startFail);
 	}
 	if (timer == secondTimer) {
@@ -239,7 +245,7 @@ void testClaims(void) {
 	}
 
 	// claim active timer
-	if (!setHardTimer(&timer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (!setHardTimer(&timer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(noStartFail);
 	}
 	for (uint8_t i = 0; i < NUM_TIMERS - 1; i++) {
@@ -281,15 +287,15 @@ void testStart(void) {
 	freq_t freq = TEST_CASES_FREQ;
 
 	// null parameters
-	if (setHardTimer(NULL, NULL, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (setHardTimer(NULL, NULL, NULL, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(allNullFail);
 	}
 	TIMER_NOT_INVALID(timer);
-	if (setHardTimer(&timer, NULL, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (setHardTimer(&timer, NULL, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(freqNullFail);
 	}
 	TIMER_NOT_INVALID(timer);
-	if (setHardTimer(&timer, &freq, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (setHardTimer(&timer, &freq, NULL, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(funcNullFail);
 	}
 	TIMER_NOT_INVALID(timer);
@@ -309,14 +315,14 @@ void testStart(void) {
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
 		hard_timer_t loopTimer = HARD_TIMER_INVALID;
 		freq = TEST_CASES_FREQ;
-		if (!setHardTimer(&loopTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+		if (!setHardTimer(&loopTimer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 			printFail(setLoopFail);
 		}
 		if (!hardTimerStarted(loopTimer)) {
 			printFail(startedLoopFail);
 		}
 	}
-	if (setHardTimer(NULL, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (setHardTimer(NULL, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(maxTimerFail);
 	}
 	for (uint8_t i = 0; i < NUM_TIMERS; i++) {
@@ -330,7 +336,7 @@ void testStart(void) {
 
 	// 0 frequency
 	freq = 0;
-	if (setHardTimer(&timer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (setHardTimer(&timer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(freq0Fail);
 	}
 	TIMER_NOT_INVALID(timer);
@@ -346,8 +352,8 @@ void testStart(void) {
 	timer = HARD_TIMER_INVALID;
 
 	// over max frequency
-	freq = FREQ_MAX + 1;
-	if (setHardTimer(&timer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	freq = HARD_TIMER_FREQ_MAX + 1;
+	if (setHardTimer(&timer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(freqMaxFail);
 	}
 	TIMER_NOT_INVALID(timer);
@@ -378,7 +384,7 @@ void testTimerPriority() {
 	// test timer claimed and unstarted
 	timer = claimTimer(NULL);
 	secondTimer = timer;
-	if (!setHardTimer(&secondTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (!setHardTimer(&secondTimer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(pNotStartedClaimedFail);
 	}
 
@@ -388,7 +394,7 @@ void testTimerPriority() {
 
 	// test timer claimed and started
 	freq = TEST_CASES_FREQ;
-	if (setHardTimer(&secondTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (setHardTimer(&secondTimer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(pStartedClaimedFail);
 	}
 
@@ -399,7 +405,7 @@ void testTimerPriority() {
 	// test timer unclaimed and started
 	unclaimTimer(secondTimer);
 
-	if (!setHardTimer(&secondTimer, &freq, testTimingFunction, DEFAULT_HARD_TIMER_PRIORITY)) {
+	if (!setHardTimer(&secondTimer, &freq, testTimingFunction, NULL, DEFAULT_HARD_TIMER_PRIORITY)) {
 		printFail(pStartedUnclaimedFail);
 	}
 
@@ -422,7 +428,9 @@ void testTiming(freq_t freq, uint8_t buffer, timer_priority_t priority) {
 	testGetStartState(functionTimer, false);
 	hardTimerCount = 0U;
 
-	if (!setHardTimer(&functionTimer, &freq, &testTimingFunction, priority)) {
+	uint32_t counter = 1;
+
+	if (!setHardTimer(&functionTimer, &freq, &testTimingFunctionParams, &counter, priority)) {
 		printFail(startFail);
 	}
 
