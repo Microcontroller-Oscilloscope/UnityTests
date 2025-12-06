@@ -18,6 +18,7 @@
 
 #include "full_test.h"
 #include <osc_common/common_thread.h>
+#include <hardware_timer_test.h>
 
 void fullTest(void) {
 	hardDelayMS(WAIT_RUN);
